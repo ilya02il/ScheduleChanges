@@ -1,0 +1,37 @@
+@import 'variables.scss';
+
+$columns-count: 12; 
+$gutter: $size-24;
+
+.row {
+  display: grid;
+  grid-template-columns: repeat($columns-count, 1fr);
+  column-gap: $gutter;
+}
+
+@mixin grid($breakpoint: '') {
+  $prefix: if($breakpoint == '', '', '-');
+
+  @for $i from 1 through $columns-count {
+    .col#{$prefix}#{$breakpoint}-#{$i} {
+      grid-column: span $i;
+    }
+  }
+
+  @for $i from 1 through $columns-count {
+    .off#{$prefix}#{$breakpoint}-#{$i} {
+      grid-column-start: $i;
+    }
+  }
+}
+
+@include grid;
+
+@media (max-width: 768px) {
+    @include grid('md');
+}
+// @each $breakpoint, $value  in $breakpoints {
+//   @media (max-width: $value) {
+//     @include grid($breakpoint);
+//   }
+// }

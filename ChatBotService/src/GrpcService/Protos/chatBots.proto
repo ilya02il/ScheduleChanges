@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "ChatBot";
+
+package ChatBot;
+
+service GrpcChatBot {
+    rpc HandleMessage(HandleMessageRequest) returns (HandleMessageResponse);
+}
+
+message HandleMessageRequest {
+    int64 chatId = 1;
+    int64 platformHash = 2;
+    string username = 3;
+    google.protobuf.Timestamp date = 4;
+    string text = 5;
+}
+
+message HandleMessageResponse {
+    int64 chatId = 1;
+    string username = 2;
+    repeated string messages = 3;
+    repeated KeyboardButtons keyboardButtons = 5;
+
+    enum KeyboardButtons {
+        GetCurrentDateSchedule = 0;
+        GetTommorowSchedule = 1;
+        Cancel = 2;
+        GoBack = 3;
+    }
+}

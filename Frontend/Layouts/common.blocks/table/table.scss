@@ -1,0 +1,9 @@
+@import '../../common.project-styles/fonts.scss';
+
+@import 'table__row.scss';
+@import 'table__row_header.scss';
+@import 'table__row_last.scss';
+
+.table {
+    @include font();
+}

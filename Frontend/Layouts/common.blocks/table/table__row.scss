@@ -1,0 +1,11 @@
+@import '../../common.project-styles/variables.scss';
+
+.table__row {
+    display: grid;
+    grid-template-columns: 2fr 2fr 3fr 11fr 4fr;
+    text-align: center;
+
+    padding: $size-16 0 $size-16 0;
+
+    border-bottom: 1px solid #A1A1A1;
+}

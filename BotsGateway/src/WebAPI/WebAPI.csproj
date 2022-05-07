@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Protos\chatBots.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="google.protobuf" Version="3.20.1" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.45.0" />
+    <PackageReference Include="grpc.tools" Version="2.45.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.13" />
+    <PackageReference Include="telegram.bot" Version="17.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\chatBots.proto" GrpcServices="Client" />
+  </ItemGroup>
+
+</Project>

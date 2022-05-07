@@ -1,0 +1,7 @@
+@import 'table__row.scss';
+
+.table__row_last {
+    @extend .table__row;
+
+    border-bottom: none;
+}

@@ -1,0 +1,19 @@
+$colors: (
+    primary: #fe7670,
+    secondary: #ffa78f,
+    aixiliary: #ffd1a9,
+    default: #e0e9f1,
+    white: #fff
+);
+
+@each $name, $color in $colors {
+    .bg-#{$name} {
+        background-color: $color !important;
+    }
+    .text-#{$name} {
+        background-color: $color !important;
+    }
+    .border-#{$name} {
+        background-color: $color !important;
+    }
+}
