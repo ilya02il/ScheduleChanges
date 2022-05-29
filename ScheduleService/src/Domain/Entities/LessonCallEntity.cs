@@ -23,5 +23,13 @@ namespace Domain.Entities
             StartTime = startTime;
             EndTime = endTime;
         }
+
+        public void UpdateLessonCallInfo(int position, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
+        {
+            Position = position;
+            DayOfWeek = dayOfWeek;
+            StartTime = startTime;
+            EndTime = endTime;
+        }
     }
 }

@@ -17,6 +17,11 @@ namespace Domain.Entities
             DayOfWeek = dayOfWeek;
         }
 
+        public void UpdateDayOfWeek(DayOfWeek dayOfWeek)
+        {
+            DayOfWeek = dayOfWeek;
+        }
+
         public override void AppendItem(ScheduleListItemEntity scheduleListItem)
         {
             if (scheduleListItem is null)

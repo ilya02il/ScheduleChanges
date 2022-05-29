@@ -6,17 +6,23 @@ namespace Domain.Entities
 {
     public class ChangesListEntity : ListEntity<ChangesListItemEntity>
     {
-        public DateTime Date { get; private set; }
+        public DateTimeOffset Date { get; private set; }
         public bool IsOddWeek { get; private set; }
 
         public Guid? EducationalOrgId { get; private set; }
         public EducationalOrgEntity EducationalOrg { get; private set; }
 
         private ChangesListEntity() : base() { }
-        public ChangesListEntity(Guid educOrgId, DateTime date, bool isOddWeek, List<ChangesListItemEntity> listItems)
-            : base(listItems)
+        public ChangesListEntity(Guid educOrgId, DateTimeOffset date, bool isOddWeek)
+            : base()
         {
             EducationalOrgId = educOrgId;
+            IsOddWeek = isOddWeek;
+            Date = date;
+        }
+
+        public void UpdateListInfo(DateTimeOffset date, bool isOddWeek)
+        {
             IsOddWeek = isOddWeek;
             Date = date;
         }

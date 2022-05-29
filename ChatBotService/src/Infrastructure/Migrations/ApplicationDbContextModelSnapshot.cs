@@ -25,6 +25,9 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsAwaiting")
+                        .HasColumnType("bit");
+
                     b.Property<long>("PlatformHash")
                         .HasColumnType("bigint");
 

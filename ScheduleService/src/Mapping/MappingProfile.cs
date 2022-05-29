@@ -1,7 +1,8 @@
 ﻿using Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesListQuery;
 using AutoMapper;
+using DatedSchedules.Messages;
 using Domain.Common;
-using static ScheduleService.GetDatedScheduleResponse.Types;
+using static DatedSchedules.Messages.GetDatedScheduleResponse.Types;
 
 namespace Application.Mapping
 {
@@ -17,8 +18,8 @@ namespace Application.Mapping
 
             CreateMap<ScheduleWithChangesListItemDto, ScheduleItem>();
             CreateMap<ScheduleWithChangesDto, GetDatedScheduleResponse>()
-                .ForMember(dest => dest.EducationalInfo.EducOrgName, act => act.MapFrom(src => src.EducOrgName))
-                .ForMember(dest => dest.EducationalInfo.GroupNumber, act => act.MapFrom(src => src.GroupNumber));
+                .ForMember(dest => dest.EducOrgName, act => act.MapFrom(src => src.EducOrgName))
+                .ForMember(dest => dest.GroupNumber, act => act.MapFrom(src => src.GroupNumber));
         }
     }
 }

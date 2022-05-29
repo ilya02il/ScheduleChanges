@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using static ChatBot.HandleMessageResponse.Types;
 
-namespace GrpcService.Services
+namespace GrpcAPI.Services
 {
     public class ChatBotService : GrpcChatBot.GrpcChatBotBase
     {

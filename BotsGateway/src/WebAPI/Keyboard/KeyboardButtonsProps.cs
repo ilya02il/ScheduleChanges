@@ -17,7 +17,9 @@ namespace WebAPI.Keyboard
             _keboardButtonsProps = new()
             {
                 { KeyboardButtons.GetCurrentDateSchedule, ("Расписание на сегодня", "/currentDate") },
-                { KeyboardButtons.GetTommorowSchedule, ("Расписание на завтра", "/tommorow") }
+                { KeyboardButtons.GetTommorowSchedule, ("Расписание на завтра", "/tommorow") },
+                { KeyboardButtons.GoBack, ("Назад", "/back") },
+                { KeyboardButtons.Cancel, ("Отмена", "/cancel") }
             };
         }
 

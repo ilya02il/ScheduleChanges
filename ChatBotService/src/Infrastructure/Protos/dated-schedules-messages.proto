@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+package datedSchedules.messages;
+option csharp_namespace = "DatedSchedules.Messages";
+
+message GetDatedScheduleRequest {
+    google.protobuf.Timestamp date = 1;
+    string educOrgName = 2;
+    string groupNumber = 3;
+}
+
+message GetDatedScheduleResponse {
+    string educOrgName = 1;
+    string groupNumber = 2;
+    google.protobuf.Timestamp date = 3;
+
+    message ScheduleItem {
+        int32 position = 1;
+        google.protobuf.Duration startTime = 2;
+        google.protobuf.Duration endTime = 3;
+        string discipline = 4;
+        string teacher = 5;
+        string auditorium = 6;
+    }
+
+    repeated ScheduleItem scheduleItems = 4;
+}
+
+message GetEducOrgsListRequest {
+
+}
+
+message GetEducOrgsListResponse {
+    repeated string educOrgNamesList = 1;
+}
+
+message GetGroupNumbersListRequest {
+    string educOrgName = 1;
+    int32 yearOfStudy = 2;
+}
+
+message GetGroupNumbersListResponse {
+    repeated string groupNumbersList = 1;
+}

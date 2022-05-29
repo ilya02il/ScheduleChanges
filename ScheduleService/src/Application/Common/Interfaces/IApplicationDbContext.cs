@@ -3,6 +3,7 @@ using Domain.Common;
 using Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Application.Common.Interfaces
 {
@@ -19,5 +20,7 @@ namespace Application.Common.Interfaces
         DbSet<DatedLessonCallEntity> DatedLessonCalls { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+
+        EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
     }
 }

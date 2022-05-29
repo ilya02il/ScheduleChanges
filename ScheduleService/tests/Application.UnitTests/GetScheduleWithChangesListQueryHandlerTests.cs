@@ -1,5 +1,4 @@
 ﻿using Application.Common.Interfaces;
-using Application.Common.Mapping;
 using Application.ScheduleWithChangesList.Queries;
 using Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesListQuery;
 using AutoMapper;
@@ -65,7 +64,7 @@ namespace Application.UnitTests
 
             var changesLists = new List<ChangesListEntity>()
             {
-                new(educOrgs[0].Id, _date, false, new())
+                new(educOrgs[0].Id, _date, false)
             };
 
             var changesListItems = new List<ChangesListItemEntity>()
@@ -198,7 +197,7 @@ namespace Application.UnitTests
             var contextMock = GetIApplicationDbContextMock();
             var mapperConfig = new MapperConfiguration(cfg =>
             {
-                cfg.AddProfile<MappingProfile>();
+               // cfg.AddProfile<MappingProfile>();
             });
             var mapper = mapperConfig.CreateMapper();
             var handler = new GetScheduleWithChangesListQueryHandler(contextMock.Object, mapper);

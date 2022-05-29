@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
+    internal delegate Task<ChatBotResponseDto> StateActionDelegate(string message = "");
+
     public class ChatBotEntity : Entity
     {
         public event GetDatedScheduleEventHandler GetDatedSchedule;
@@ -22,10 +24,11 @@ namespace Domain.Entities
         public long PlatformHash { get; private set; }
         public UserInfo UserInfo { get; private set; }
         public BotStates State { get; private set; } = BotStates.Selecting;
-        //public bool IsAwaiting { get; private set; } = false;
+        public bool IsAwaiting { get; private set; } = false;
 
-        private readonly Dictionary<BotStates, Func<string, Task<ChatBotResponseDto>>> _statesActions;
+        private readonly Dictionary<BotStates, StateActionDelegate> _statesActions;
         private readonly Dictionary<string, string> _responses = BotResponsesStrings.GetResponsesStrings();
+        private readonly List<string> _messages = new();
 
         private DateTimeOffset _messageDate;
 
@@ -78,16 +81,13 @@ namespace Domain.Entities
             {
                 case CancelCommand:
                     State = BotStates.Selecting;
-                    return await Task.FromResult(new ChatBotResponseDto(this, new[] { _responses["cancelMsg"] }, _standartMarkup));
+                    IsAwaiting = false;
+                    _messages.Add(_responses["cancelMsg"]);
+                    return await Task.FromResult(new ChatBotResponseDto(this, _messages, _standartMarkup));
                 case GoBackCommand:
                     State -= 1;
-                    return default;
-            }
-
-            if (message == CancelCommand)
-            {
-                State = BotStates.Selecting;
-                return await Task.FromResult(new ChatBotResponseDto(this, new[] { _responses["cancelMsg"] }, _standartMarkup));
+                    IsAwaiting = false;
+                    return await _statesActions[State].Invoke();
             }
 
             _messageDate = messageDate;
@@ -120,42 +120,28 @@ namespace Domain.Entities
 
         private async Task<ChatBotResponseDto> StartCommandHandler()
         {
+            _messages.Add(_responses["startMsg"]);
+
             State = BotStates.EducOrgEditing;
-
-            var educOrgList = await ShowEducOrgsList();
-
-            var result = new string[educOrgList.Length + 2];
-
-            result[0] = _responses["startMsg"];
-            educOrgList.CopyTo(result, 1);
-            result[^1] = _responses["editInfoMsg1"];
-
-            return new(this, result, _emptyMarkup);
+            return await _statesActions[State].Invoke();
         }
 
         private ChatBotResponseDto HelpCommandHandler()
         {
             State = BotStates.Selecting;
-            var messages = new[]
+            _messages.AddRange(new[]
             {
                 _responses["helpMsg1"],
                 _responses["helpMsg2"]
-            };
+            });
 
-            return new(this, messages, _standartMarkup);
+            return new(this, _messages, _standartMarkup);
         }
 
         private async Task<ChatBotResponseDto> EditCommandHandler()
         {
             State = BotStates.EducOrgEditing;
-            var educOrgList = await ShowEducOrgsList();
-
-            var result = new string[educOrgList.Length + 1];
-
-            educOrgList.CopyTo(result, 0);
-            result[educOrgList.Length] = _responses["editInfoMsg1"];
-
-            return new(this, result, _emptyMarkup);
+            return await _statesActions[State].Invoke();
         }
 
         private async Task<ChatBotResponseDto> DefaultCommandHandler(string message)
@@ -165,14 +151,17 @@ namespace Domain.Entities
             var dateRegex = new Regex(DateRegexPattern, RegexOptions.Compiled);
 
             if (!dateRegex.IsMatch(message))
-                return new(this, new[] { _responses["unsupportedFormatMsg"] }, _standartMarkup);
+            {
+                _messages.Add(_responses["unsupportedFormatMsg"]);
+                return new(this, _messages, _standartMarkup);
+            }
 
             var date = (DateTimeOffset)Convert.ToDateTime(message);
 
             return await ShowDatedSchedule(date);
         }
 
-        private async Task<string[]> ShowEducOrgsList()
+        private async Task<IList<string>> ShowEducOrgsList()
         {
             var messages = new List<string>();
 
@@ -180,16 +169,22 @@ namespace Domain.Entities
 
             int i = 0;
 
+            if (!educOrgNames.Any())
+            {
+                messages.Add(_responses["editInfoEmptyListMsg"]);
+                return messages;
+            }
+
             foreach (var educOrgName in educOrgNames)
             {
                 messages.Add(string.Format(_responses["editInfoMsgTemplate1"], i + 1, educOrgName));
                 i++;
             }
 
-            return messages.ToArray();
+            return messages;
         }
 
-        private async Task<string[]> ShowGroupNumbersList()
+        private async Task<IList<string>> ShowGroupNumbersList()
         {
             var messages = new List<string>();
 
@@ -199,18 +194,32 @@ namespace Domain.Entities
 
             int i = 0;
 
+            if (!groupNumbers.Any())
+            {
+                messages.Add(_responses["editInfoEmptyListMsg"]);
+                return messages;
+            }
+
             foreach (var groupNumber in groupNumbers)
             {
                 messages.Add(string.Format(_responses["editInfoMsgTemplate1"], i + 1, groupNumber));
                 i++;
             }
 
-            return messages.ToArray();
+            return messages;
         }
 
         private async Task<ChatBotResponseDto> EditEducOrgName(string message)
         {
-            string[] messages;
+            if (!IsAwaiting)
+            {
+                _messages.AddRange(await ShowEducOrgsList());
+                _messages.Add(_responses["editInfoMsg1"]);
+
+                IsAwaiting = true;
+
+                return new(this, _messages, _editingMarkup);
+            }
 
             try
             {
@@ -226,25 +235,32 @@ namespace Domain.Entities
 
                 State = BotStates.SelectingYearOfStudy;
 
-                messages = new[] { _responses["editInfoMsg3"] };
+                IsAwaiting = false;
 
-                return new(this, messages, _emptyMarkup);
+                return await _statesActions[State].Invoke();
             }
             catch
             {
-                messages = new[]
+                _messages.AddRange(new[]
                 {
                     _responses["editInfoFailedMsg1"],
                     _responses["editInfoFailedMsg2"]
-                };
+                });
 
-                return new(this, messages, _emptyMarkup);
+                return new(this, _messages, _emptyMarkup);
             }
         }
 
         private async Task<ChatBotResponseDto> SelectYearOfStudy(string message)
         {
-            string[] messages;
+            if (!IsAwaiting)
+            {
+                _messages.Add(_responses["editInfoMsg3"]);
+
+                IsAwaiting = true;
+
+                return new(this, _messages, _editingMarkup);
+            }
 
             try
             {
@@ -254,30 +270,33 @@ namespace Domain.Entities
 
                 State = BotStates.GroupNumEditing;
 
-                var groupNumberList = await ShowGroupNumbersList();
+                IsAwaiting = false;
 
-                messages = new string[groupNumberList.Length + 1];
-
-                groupNumberList.CopyTo(messages, 0);
-                messages[groupNumberList.Length] = _responses["editInfoMsg2"];
-
-                return new(this, messages, _emptyMarkup);
+                return await _statesActions[State].Invoke();
             }
             catch
             {
-                messages = new[]
+                _messages.AddRange(new[]
                 {
                     _responses["unsupportedFormatMsg"],
                     _responses["editInfoFailedMsg6"]
-                };
+                });
 
-                return new(this, messages, _emptyMarkup);
+                return new(this, _messages, _emptyMarkup);
             }
         }
 
         private async Task<ChatBotResponseDto> EditGroupNumber(string message)
         {
-            string[] messages;
+            if (!IsAwaiting)
+            {
+                _messages.AddRange(await ShowGroupNumbersList());
+                _messages.Add(_responses["editInfoMsg2"]);
+
+                IsAwaiting = true;
+
+                return new(this, _messages, _editingMarkup);
+            }
 
             try
             {
@@ -291,38 +310,37 @@ namespace Domain.Entities
                 UserInfo.EducationalInfo.GroupNumber = groupNumbers[idx];
                 State = BotStates.Selecting;
 
-                messages = new[]
+                _messages.AddRange(new[]
                 {
                     _responses["succeedEditMsg"],
                     _responses["helpMsg1"],
                     _responses["helpMsg2"]
-                };
+                });
 
-                return new(this, messages, _standartMarkup);
+                IsAwaiting = false;
+
+                return new(this, _messages, _standartMarkup);
             }
             catch
             {
-                messages = new[]
+                _messages.AddRange(new[]
                 {
                     _responses["editInfoFailedMsg3"],
                     _responses["editInfoFailedMsg4"]
-                };
+                });
 
-                return new(this, messages, _emptyMarkup);
+                return new(this, _messages, _emptyMarkup);
             }
         }
 
         private async Task<ChatBotResponseDto> ShowDatedSchedule(DateTimeOffset date)
         {
-            var messages = new List<string>();
-
             if (UserInfo.EducationalInfo.EducOrgName is null ||
-                UserInfo.EducationalInfo.YearOfStudy == 0 ||
                 UserInfo.EducationalInfo.GroupNumber is null)
             {
-                messages.Add(_responses["notCompleteEducInfoMsg"]);
+                _messages.Add(_responses["notCompleteEducInfoMsg"]);
 
-                return new(this, messages.ToArray(), _standartMarkup);
+                return new(this, _messages, _standartMarkup);
             }
 
             var args = new GetDatedScheduleEventArgs(UserInfo.EducationalInfo.EducOrgName, UserInfo.EducationalInfo.GroupNumber, date.LocalDateTime);
@@ -334,7 +352,7 @@ namespace Domain.Entities
 
             if (datedSchedule.ScheduleItems.Any())
             {
-                messages.Add(
+                _messages.Add(
                 string.Format(_responses["scheduleMsgTemplate1"],
                     datedSchedule.Date.LocalDateTime.ToShortDateString()
                     )
@@ -344,8 +362,8 @@ namespace Domain.Entities
 
                 for (int i = 0; i < datedSchedule.ScheduleItems.Count; i++)
                 {
-                    messages.Add(string.Format("\n" + _responses["scheduleMsgTemplate2"],
-                            i + 1,
+                    _messages.Add(string.Format("\n" + _responses["scheduleMsgTemplate2"],
+                            datedSchedule.ScheduleItems[i].Position,
                             datedSchedule.ScheduleItems[i].StartTime.ToString(timeFormatString),
                             datedSchedule.ScheduleItems[i].EndTime.ToString(timeFormatString),
                             datedSchedule.ScheduleItems[i].Discipline,
@@ -358,12 +376,12 @@ namespace Domain.Entities
 
             else
             {
-                messages.Add(string.Format(_responses["emptyScheduleMsg"],
+                _messages.Add(string.Format(_responses["emptyScheduleMsg"],
                         datedSchedule.Date.LocalDateTime.ToShortDateString())
                     );
             }
 
-            return new(this, messages.ToArray(), _standartMarkup);
+            return new(this, _messages, _standartMarkup);
         }
     }
 }

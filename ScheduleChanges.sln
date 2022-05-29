@@ -18,9 +18,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChatBotService", "ChatBotService", "{64553227-9203-4CE9-A47C-CB169C1595C4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{64D4BEE9-0A3A-4C2A-9E5F-BFF52ABCB432}"
-	ProjectSection(SolutionItems) = preProject
-		ChatBotService\src\bot_responses.json = ChatBotService\src\bot_responses.json
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8DB6C7D9-85CB-4063-A0B6-54330A77D325}"
 EndProject
@@ -44,7 +41,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.UnitTests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "BotsGateway\src\WebAPI\WebAPI.csproj", "{8D37E1CD-95A9-40EC-8329-E913F7A64143}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcService", "ChatBotService\src\GrpcService\GrpcService.csproj", "{F139A2C9-F911-415A-8436-B43B9B7E734E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcAPI", "ChatBotService\src\GrpcService\GrpcAPI.csproj", "{F139A2C9-F911-415A-8436-B43B9B7E734E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AdminWebsite", "AdminWebsite", "{3804E2E8-D67E-4211-ACC8-DCC9EBA0DDE4}"
 EndProject
@@ -54,9 +51,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7D676DF7
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "AdminWebsite\src\WebAPI\WebAPI.csproj", "{00E3AF3A-4E07-43A0-85CE-E4353AF70C95}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcServices", "ScheduleService\src\GrpcServices\GrpcServices.csproj", "{B7242C97-D0D4-45C1-AEDB-68B5C3370027}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcAPI", "ScheduleService\src\GrpcServices\GrpcAPI.csproj", "{B7242C97-D0D4-45C1-AEDB-68B5C3370027}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.UnitTests", "ScheduleService\tests\Application.UnitTests\Application.UnitTests.csproj", "{1CD4D161-68F4-49B5-BC36-5AE070F67F1A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IdentityService", "IdentityService", "{A752F34B-309A-4AF5-AD2C-1E46AA037460}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityAPI", "IdentityService\src\IdentityAPI\IdentityAPI.csproj", "{1D4B41B6-9971-42C0-91F3-D51D80D60159}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientApp", "IdentityService\src\ClientApp\ClientApp.csproj", "{DACBA579-9A2F-419E-84F9-FC192D2B97FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -120,6 +123,14 @@ Global
 		{1CD4D161-68F4-49B5-BC36-5AE070F67F1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CD4D161-68F4-49B5-BC36-5AE070F67F1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CD4D161-68F4-49B5-BC36-5AE070F67F1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D4B41B6-9971-42C0-91F3-D51D80D60159}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D4B41B6-9971-42C0-91F3-D51D80D60159}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D4B41B6-9971-42C0-91F3-D51D80D60159}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D4B41B6-9971-42C0-91F3-D51D80D60159}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DACBA579-9A2F-419E-84F9-FC192D2B97FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DACBA579-9A2F-419E-84F9-FC192D2B97FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DACBA579-9A2F-419E-84F9-FC192D2B97FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DACBA579-9A2F-419E-84F9-FC192D2B97FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -147,6 +158,8 @@ Global
 		{00E3AF3A-4E07-43A0-85CE-E4353AF70C95} = {B1E47C2C-E86A-427C-AA93-B333521F0E68}
 		{B7242C97-D0D4-45C1-AEDB-68B5C3370027} = {186AA081-BFBC-428F-B28A-CCEBF3029872}
 		{1CD4D161-68F4-49B5-BC36-5AE070F67F1A} = {DD815555-FD51-4BB8-9E96-7879BFA2AA65}
+		{1D4B41B6-9971-42C0-91F3-D51D80D60159} = {A752F34B-309A-4AF5-AD2C-1E46AA037460}
+		{DACBA579-9A2F-419E-84F9-FC192D2B97FE} = {A752F34B-309A-4AF5-AD2C-1E46AA037460}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AEE40B53-F8C9-4E44-83C7-028CD0BDDD12}

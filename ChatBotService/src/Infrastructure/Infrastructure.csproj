@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Protos\schedules.proto" />
+    <None Remove="Protos\dated-schedules-messages.proto" />
+    <None Remove="Protos\dated-schedules-service.proto" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,13 +32,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\schedules.proto">
-      <GrpcServices>Client</GrpcServices>
-    </Protobuf>
+    <Folder Include="EF\Migrations\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="EF\Migrations\" />
+    <Protobuf Include="Protos\dated-schedules-messages.proto" GrpcServices="None" />
+    <Protobuf Include="Protos\dated-schedules-service.proto" GrpcServices="Client" ProtoRoot="Protos\" >
+      <ProtoRoot>Protos\</ProtoRoot>
+    </Protobuf>
   </ItemGroup>
 
 </Project>

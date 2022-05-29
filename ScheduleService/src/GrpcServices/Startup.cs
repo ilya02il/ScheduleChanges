@@ -1,7 +1,7 @@
 ﻿using Application;
-using GrpcServices.Services;
+using GrpcAPI.Profiles;
+using GrpcAPI.Services;
 using Infrastructure;
-using Mapping;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
 
-namespace GrpcServices
+namespace GrpcAPI
 {
     public class Startup
     {
@@ -29,7 +29,10 @@ namespace GrpcServices
             services.AddApplication();
             services.AddInfrastructure(Configuration);
 
-            services.AddGrpc();
+            services.AddGrpc(options =>
+            {
+                options.MaxReceiveMessageSize = 11 * 1024 * 1024;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,7 +47,11 @@ namespace GrpcServices
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<SchedulesService>();
+                endpoints.MapGrpcService<DatedSchedulesService>();
+                endpoints.MapGrpcService<ScheduleChangesListsService>();
+                endpoints.MapGrpcService<ScheduleListsService>();
+                endpoints.MapGrpcService<GroupsService>();
+                endpoints.MapGrpcService<CallScheduleListsService>();
 
                 endpoints.MapGet("/", async context =>
                 {

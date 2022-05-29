@@ -5,7 +5,7 @@ using Infrastructure.RedisCache;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ScheduleService;
+using DatedSchedules.Service;
 using System;
 
 namespace Infrastructure

@@ -19,5 +19,14 @@ namespace Domain.Entities
             GroupNumber = groupNumber;
             YearOfStudy = yearOfStudy;
         }
+
+        public void UpdateGroupInfo(string groupNumber, int yearOfStudy)
+        {
+            if (!(yearOfStudy > 0))
+                throw new ArgumentException("Year of study shoul be greater than 0");
+
+            GroupNumber = groupNumber;
+            YearOfStudy = yearOfStudy;
+        }
     }
 }

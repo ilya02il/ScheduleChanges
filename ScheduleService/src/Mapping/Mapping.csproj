@@ -8,4 +8,10 @@
     <PackageReference Include="automapper.extensions.microsoft.dependencyinjection" Version="11.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Application\Application.csproj" />
+    <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\GrpcServices\GrpcAPI.csproj" />
+  </ItemGroup>
+
 </Project>

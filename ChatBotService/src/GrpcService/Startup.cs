@@ -1,4 +1,4 @@
-﻿using GrpcService.Services;
+﻿using GrpcAPI.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +9,7 @@ using Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Mapping;
 
-namespace GrpcService
+namespace GrpcAPI
 {
     public class Startup
     {
@@ -44,11 +44,6 @@ namespace GrpcService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<ChatBotService>();
-
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("404");
-                });
             });
         }
     }

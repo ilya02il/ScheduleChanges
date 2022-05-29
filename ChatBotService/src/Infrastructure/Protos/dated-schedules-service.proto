@@ -1,0 +1,17 @@
+﻿syntax = "proto3";
+
+import "dated-schedules-messages.proto";
+
+package datedSchedules.service;
+option csharp_namespace = "DatedSchedules.Service";
+
+service GrpcSchedule {
+    rpc GetDatedSchedule(datedSchedules.messages.GetDatedScheduleRequest)
+        returns (datedSchedules.messages.GetDatedScheduleResponse);
+
+    rpc GetEducOrgsList(datedSchedules.messages.GetEducOrgsListRequest) 
+        returns (datedSchedules.messages.GetEducOrgsListResponse);
+
+    rpc GetGroupNumbersList(datedSchedules.messages.GetGroupNumbersListRequest) 
+        returns (datedSchedules.messages.GetGroupNumbersListResponse);
+}

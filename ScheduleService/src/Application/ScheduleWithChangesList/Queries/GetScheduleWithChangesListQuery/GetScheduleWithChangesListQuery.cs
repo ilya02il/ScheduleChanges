@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -48,10 +49,9 @@ namespace Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesList
 
             var changesList = await _context.ChangesLists
                 .AsNoTracking()
-                .SingleOrDefaultAsync(cl => cl.EducationalOrgId == educOrgId &&
-                    cl.Date.Date == request.Date.Date,
+                .FirstOrDefaultAsync(cl => cl.EducationalOrgId == educOrgId &&
+                    cl.Date.Date == request.Date.Date.Date,
                     cancellationToken);
-
 
 
             var changesListItems = changesList is null ? 
@@ -65,9 +65,11 @@ namespace Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesList
             //взять из базы расписание с нужными названием образовательной организации
             //и номером группы
 
+            var isOddWeek = changesList?.IsOddWeek;
+
             var scheduleList = await _context.ScheduleLists
                 .AsNoTracking()
-                .SingleOrDefaultAsync(sl => sl.DayOfWeek == request.Date.DayOfWeek &&
+                .FirstOrDefaultAsync(sl => sl.DayOfWeek == request.Date.DayOfWeek &&
                     sl.GroupId == groupId,
                     cancellationToken);
 
@@ -76,7 +78,7 @@ namespace Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesList
                 _context.ScheduleListItems
                     .AsNoTracking()
                     .Where(li => li.ScheduleListId == scheduleList.Id &&
-                        li.IsOddWeek == changesList.IsOddWeek ||
+                        li.IsOddWeek == (isOddWeek ?? true) ||
                         li.IsOddWeek == null)
                     .OrderBy(li => li.ItemInfo.Position)
                     .ToList();
@@ -98,15 +100,15 @@ namespace Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesList
 
             var lessonCallsList = lessonCalls.ToList();
 
-            if (changesList is not null)
+            ScheduleWithChangesListItemDto buffer;
+            LessonCallEntity lessonCallsBuffer;
+
+            for (int i = 0; i < scheduleListItems.Count; i++)
             {
-                ScheduleWithChangesListItemDto buffer;
-                LessonCallEntity lessonCallsBuffer;
+                buffer = null;
 
-                for (int i = 0; i < scheduleListItems.Count; i++)
+                if (changesList is not null)
                 {
-                    buffer = null;
-
                     for (int j = 0; j < changesListItems.Count; j++)
                     {
                         if (!(changesListItems[j].ItemInfo.Position <= scheduleListItems[i].ItemInfo.Position))
@@ -123,24 +125,18 @@ namespace Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesList
 
                         changesListItems.Remove(changesListItems[j]);
                     }
-
-                    if (buffer is null)
-                    {
-                        buffer = _mapper.Map<ScheduleWithChangesListItemDto>(scheduleListItems[i]);
-                        lessonCallsBuffer = lessonCallsList.Single(lc => lc.Position == scheduleListItems[i].ItemInfo.Position);
-
-                        buffer.StartTime = lessonCallsBuffer.StartTime;
-                        buffer.EndTime = lessonCallsBuffer.EndTime;
-                    }
-
-                    resultItemsList.Add(buffer);
                 }
-            }
 
-            else
-            {
-                if (scheduleListItems is not null)
-                    resultItemsList.AddRange(scheduleListItems.Select(si => _mapper.Map<ScheduleWithChangesListItemDto>(si)));
+                if (buffer is null)
+                {
+                    buffer = _mapper.Map<ScheduleWithChangesListItemDto>(scheduleListItems[i]);
+                    lessonCallsBuffer = lessonCallsList.Single(lc => lc.Position == scheduleListItems[i].ItemInfo.Position);
+
+                    buffer.StartTime = lessonCallsBuffer.StartTime;
+                    buffer.EndTime = lessonCallsBuffer.EndTime;
+                }
+
+                resultItemsList.Add(buffer);
             }
 
             return new ScheduleWithChangesDto()
