@@ -2,39 +2,45 @@ using Application;
 using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System;
+using System.Reflection;
+using WebAPI.Profiles;
 
 namespace WebAPI
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
+        // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+
+        public IConfiguration Configuration { get; set; }
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplication();
             services.AddInfrastructure(Configuration);
 
-            services.AddControllers()
-                .AddNewtonsoftJson(setup => 
-                    setup.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-                 );
+            services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+
+            services.AddControllers();
 
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "ScheduleService", Version = "v1"});
-                options.MapType(typeof(IFormFile), () => new OpenApiSchema() { Type = "file", Format = "binary" });
+                options.SwaggerDoc("v1", new OpenApiInfo()
+                {
+                    Title = "University schedule service - Admin Website API",
+                    Version = "v1",
+                    Description = "WebAPI gateway for administrator website."
+                });
             });
         }
 
@@ -46,16 +52,18 @@ namespace WebAPI
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseRouting();
-
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "ScheduleService v1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Admin Website API v1");
             });
 
+            app.UseRouting();
 
-            app.UseEndpoints(endpoints => endpoints.MapControllers());
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

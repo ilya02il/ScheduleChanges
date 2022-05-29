@@ -46,7 +46,7 @@ namespace Application.CallSchedules.Queries
             {
                 DayOfWeek = request.DayOfWeek,
                 ListItems = await lessonCalls.Select(lc => _mapper.Map<CallScheduleListItemDto>(lc))
-                    .ToListAsync(cancellationToken)
+                    .ToArrayAsync(cancellationToken)
             };
 
             return callScheduleList;

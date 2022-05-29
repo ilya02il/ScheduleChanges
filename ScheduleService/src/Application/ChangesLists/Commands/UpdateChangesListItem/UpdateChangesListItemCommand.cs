@@ -4,6 +4,7 @@ using Domain.ValueObjects;
 using MediatR;
 using System;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,7 +12,8 @@ namespace Application.ChangesLists.Commands.UpdateChangesListItem
 {
     public class UpdateChangesListItemCommand : IRequest<bool>
     {
-        public Guid Id { get; init; }
+        [JsonIgnore]
+        public Guid Id { get; set; }
         public Guid GroupId { get; init; }
         public int Position { get; init; }
         public string Discipline { get; init; }

@@ -51,7 +51,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7D676DF7
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "AdminWebsite\src\WebAPI\WebAPI.csproj", "{00E3AF3A-4E07-43A0-85CE-E4353AF70C95}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcAPI", "ScheduleService\src\GrpcServices\GrpcAPI.csproj", "{B7242C97-D0D4-45C1-AEDB-68B5C3370027}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceAPI", "ScheduleService\src\GrpcServices\ServiceAPI.csproj", "{B7242C97-D0D4-45C1-AEDB-68B5C3370027}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.UnitTests", "ScheduleService\tests\Application.UnitTests\Application.UnitTests.csproj", "{1CD4D161-68F4-49B5-BC36-5AE070F67F1A}"
 EndProject

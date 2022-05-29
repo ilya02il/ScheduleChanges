@@ -2,6 +2,7 @@
 using Domain.Entities;
 using MediatR;
 using System;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,7 +10,8 @@ namespace Application.Groups.Commands
 {
     public class CreateGroupCommand : IRequest<bool>
     {
-        public Guid EducOrgId { get; init; }
+        [JsonIgnore]
+        public Guid EducOrgId { get; set; }
         public string GroupNumber { get; init; }
         public int YearOfStudy { get; init; }
     }

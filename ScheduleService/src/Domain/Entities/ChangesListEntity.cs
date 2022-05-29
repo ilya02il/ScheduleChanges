@@ -1,6 +1,7 @@
 ﻿using Domain.Common;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Domain.Entities
 {
@@ -10,6 +11,7 @@ namespace Domain.Entities
         public bool IsOddWeek { get; private set; }
 
         public Guid? EducationalOrgId { get; private set; }
+        [JsonIgnore]
         public EducationalOrgEntity EducationalOrg { get; private set; }
 
         private ChangesListEntity() : base() { }

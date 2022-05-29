@@ -10,6 +10,11 @@ namespace Application.ChangesLists.Commands.DeleteChangesList
     public class DeleteChangesListCommand : IRequest<bool>
     {
         public Guid Id { get; init; }
+
+        public DeleteChangesListCommand(Guid id)
+        {
+            Id = id;
+        }
     }
 
     public class DeleteChangesListCommandHandler : IRequestHandler<DeleteChangesListCommand, bool>

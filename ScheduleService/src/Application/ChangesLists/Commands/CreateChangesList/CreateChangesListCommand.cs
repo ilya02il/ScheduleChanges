@@ -4,6 +4,7 @@ using Domain.Entities;
 using MediatR;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,10 +12,11 @@ namespace Application.ChangesLists.Commands.CreateChangesList
 {
     public class CreateChangesListCommand : IRequest<bool>
     {
+        [JsonIgnore]
         public Guid EducOrgId { get; set; }
-        public DateTimeOffset Date { get; set; }
-        public bool IsOddWeek { get; set; }
-        public IEnumerable<ChangesListItemDto> ListItems { get; set; }
+        public DateTimeOffset Date { get; init; }
+        public bool IsOddWeek { get; init; }
+        public IEnumerable<ChangesListItemDto> ListItems { get; init; }
     }
 
     public class CreateChangesListCommandHandler : IRequestHandler<CreateChangesListCommand, bool>

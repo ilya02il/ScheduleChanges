@@ -10,6 +10,11 @@ namespace Application.CallSchedules.Commands
     public class DeleteCallScheduleListItemCommand : IRequest<bool>
     {
         public Guid Id { get; init; }
+
+        public DeleteCallScheduleListItemCommand(Guid id)
+        {
+            Id = id;
+        }
     }
 
     public class DeleteCallScheduleListItemCommandHandler : IRequestHandler<DeleteCallScheduleListItemCommand, bool>

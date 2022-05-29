@@ -2,6 +2,7 @@
 using Domain.ValueObjects;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Domain.Entities
 {
@@ -9,9 +10,11 @@ namespace Domain.Entities
     public class ChangesListItemEntity : ListItemEntity
     {
         public Guid GroupId { get; private set; }
+        [JsonIgnore]
         public GroupEntity Group { get; private set; }
 
         public Guid ChangesListId { get; private set; }
+        [JsonIgnore]
         public ChangesListEntity ChangesList { get; private set; }
 
         private ChangesListItemEntity() : base() { }

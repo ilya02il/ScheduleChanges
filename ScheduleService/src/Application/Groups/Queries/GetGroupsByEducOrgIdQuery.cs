@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Application.Groups.Dtos;
 using AutoMapper;
+using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -40,7 +41,7 @@ namespace Application.Groups.Queries
                 .Where(g => g.EducationalOrgId == request.EducOrgId)
                 .ToListAsync(cancellationToken);
 
-            return _mapper.Map<IEnumerable<GroupDto>>(groups);
+            return _mapper.Map<List<GroupDto>>(groups);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Application.ScheduleLists.Queries
                 .AsNoTracking()
                 .Where(sl => sl.GroupId == request.GroupId)
                 .OrderBy(sl => sl.DayOfWeek)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return _mapper.Map<List<ScheduleListDto>>(scheduleLists);
         }

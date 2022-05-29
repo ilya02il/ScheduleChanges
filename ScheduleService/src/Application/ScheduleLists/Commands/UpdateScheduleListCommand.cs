@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,7 +17,8 @@ namespace Application.ScheduleLists.Commands
 {
     public class UpdateScheduleListCommand : IRequest<bool>
     {
-        public Guid Id { get; init; }
+        [JsonIgnore]
+        public Guid Id { get; set; }
         public DayOfWeek DayOfWeek { get; init; }
         public IList<ScheduleListItemDto> ListItems { get; init; }
     }

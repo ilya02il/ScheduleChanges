@@ -2,6 +2,7 @@
 using MediatR;
 using System;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,7 +10,8 @@ namespace Application.CallSchedules.Commands
 {
     public class UpdateCallScheduleListItemCommand : IRequest<bool>
     {
-        public Guid Id { get; init; }
+        [JsonIgnore]
+        public Guid Id { get; set; }
         public int Position { get; init; }
         public TimeSpan StartTime { get; init; }
         public TimeSpan EndTime { get; init; }

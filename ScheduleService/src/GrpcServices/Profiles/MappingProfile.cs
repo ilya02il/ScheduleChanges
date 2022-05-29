@@ -9,19 +9,15 @@ using Domain.Entities;
 using Application.ChangesLists.Commands.CreateChangesListItem;
 using Domain.ValueObjects;
 using Application.ChangesLists.Commands.UpdateChangesListItem;
-using ChangesLists.Messages;
 using Google.Protobuf.Collections;
 using System.Collections.Generic;
 using Application.ChangesLists.Queries.GetBriefScheduleChangesList;
-using ScheduleLists.Messages;
 using Application.ScheduleLists.Dtos;
 using System;
 using Application.Groups.Dtos;
-using Groups.Messages;
 using Application.CallSchedules.Dtos;
-using CallSchedules.Messages;
 
-namespace GrpcAPI.Profiles
+namespace ServiceAPI.Profiles
 {
     public class MappingProfile : Profile
     {
@@ -48,29 +44,8 @@ namespace GrpcAPI.Profiles
             CreateMap<Timestamp, DateTimeOffset>()
                 .ConvertUsing(src => src.ToDateTimeOffset());
 
-            //
+            ////////////////////////////////////////
 
-            CreateMap<CallScheduleListItemDto, CallScheduleListItem>();
-
-            CreateMap<LessonCallEntity, CallScheduleListItemDto>();
-
-            CreateMapsForScheduleWithChangesLists();
-            CreateMapsForChangesLists();
-            CreateMapsForScheduleLists();
-            CreateMapsForGroups();
-        }
-
-        private void CreateMapsForGroups()
-        {
-            CreateMap<GroupEntity, GroupDto>();
-
-            CreateMap<GroupDto, Group>();
-
-            CreateMap<BriefGroupDto, GroupBrief>();
-        }
-
-        private void CreateMapsForScheduleWithChangesLists()
-        {
             CreateMap<ListItemEntity, ScheduleWithChangesListItemDto>()
                 .ForMember(dest => dest.Discipline, act => act.MapFrom(src => src.ItemInfo.SubjectName))
                 .ForMember(dest => dest.Teacher, act => act.MapFrom(src => src.ItemInfo.TeacherInitials));
@@ -78,10 +53,23 @@ namespace GrpcAPI.Profiles
             CreateMap<ScheduleWithChangesListItemDto, ScheduleItem>();
 
             CreateMap<ScheduleWithChangesDto, GetDatedScheduleResponse>();
-        }
 
-        private void CreateMapsForChangesLists()
-        {
+            ////////////////////////////////////////
+
+            CreateMap<LessonCallEntity, CallScheduleListItemDto>();
+
+            CreateMap<GroupEntity, GroupDto>();
+
+            ////////////////////////////////////////
+
+            CreateMap<ScheduleListEntity, ScheduleListDto>();
+
+            CreateMap<ScheduleListItemDto, ItemInfo>()
+                .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.Discipline))
+                .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.Teacher));
+
+            ////////////////////////////////////////
+
             CreateMap<ChangesListItemDto, ItemInfo>()
                 .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.SubjectName))
                 .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.TeacherInitials));
@@ -101,51 +89,6 @@ namespace GrpcAPI.Profiles
             CreateMap<UpdateChangesListItemCommand, ItemInfo>()
                 .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.Discipline))
                 .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.Teacher));
-
-            CreateMap<ChangesListItemEntity, ChangesListItem>()
-                .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.ItemInfo.SubjectName))
-                .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.ItemInfo.TeacherInitials));
-
-            CreateMap<ChangesListEntity, GetChangesListByIdResponse>()
-                .ForMember(dest => dest.ListId, act => act.MapFrom(src => src.Id.ToString()))
-                .ForMember(dest => dest.EducOrgId, act => act.MapFrom(src => src.EducationalOrgId.ToString()));
-
-            CreateMap<BriefChangesListDto, BriefChangesList>();
-        }
-
-        private void CreateMapsForScheduleLists()
-        {
-            CreateMap<BooleanValue, bool>()
-                .ConvertUsing(booleanValue => booleanValue.Value);
-
-            CreateMap<ScheduleListItem, ScheduleListItemDto>();
-
-            CreateMap<ScheduleListItemDto, ScheduleListItem>()
-                .ForMember(dest => dest.IsOddWeek, act => act.MapFrom(src => src.IsOddWeek != null ? new BooleanValue() { Value = src.IsOddWeek.Value } : null));
-
-            CreateMap<ScheduleListEntity, ScheduleListDto>();
-
-            CreateMap<ItemInfo, ScheduleListItemDto>()
-                .ForMember(dest => dest.Discipline, act => act.MapFrom(src => src.SubjectName))
-                .ForMember(dest => dest.Teacher, act => act.MapFrom(src => src.TeacherInitials))
-                .ReverseMap();
-
-            CreateMap<ScheduleListItemEntity, ScheduleListItemDto>()
-                .ConvertUsing(typeof(ScheduleListItemEntityToScheduleListItemDtoConverter));
-
-            CreateMap<ScheduleListDto, ScheduleList>();
-        }
-
-        private class ScheduleListItemEntityToScheduleListItemDtoConverter
-            : ITypeConverter<ScheduleListItemEntity, ScheduleListItemDto>
-        {
-            public ScheduleListItemDto Convert(ScheduleListItemEntity source, ScheduleListItemDto destination, ResolutionContext context)
-            {
-                destination = new ScheduleListItemDto(source.Id, source.IsOddWeek);
-                context.Mapper.Map(source.ItemInfo, destination);
-
-                return destination;
-            }
         }
 
         private class IEnumerableToRepeatedFieldTypeConverter<TITemSource, TITemDest>

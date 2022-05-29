@@ -8,7 +8,7 @@ using DatedSchedules.Messages;
 using DatedSchedules.Service;
 using System.Threading.Tasks;
 
-namespace GrpcAPI.Services
+namespace ServiceAPI.Services
 {
     public class DatedSchedulesService : GrpcSchedule.GrpcScheduleBase
     {
