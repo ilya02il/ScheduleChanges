@@ -2,16 +2,17 @@
   "profiles": {
     "GrpcAPI": {
       "commandName": "Project",
+      "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "SqlServerConnection": "Data Source=DESKTOP-3J0KV7C\\SQLEXPRESS;Database=ChatBotServiceDb;Integrated Security=True;",
-        "RedisConnection": "localhost:6379",
-        "GrpcScheduleServiceConnection": "http://localhost:5255",
-        "TgBotToken": "5263166008:AAEnSw0_oYrZjzaQPQ3xuV0C9EYGjTjEqmc",
-        "TgBotHostAddress": "https://bf3d-171-33-248-232.jp.ngrok.io"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:5278",
       "dotnetRunMessages": true
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "publishAllPorts": true
     }
   }
 }

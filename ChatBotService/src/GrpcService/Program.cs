@@ -1,5 +1,6 @@
 using Infrastructure.EF;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,26 +19,55 @@ namespace GrpcAPI
 
             var services = scope.ServiceProvider;
 
-            //try
-            //{
-                var context = services.GetRequiredService<ApplicationDbContext>();
+            var context = services.GetRequiredService<ApplicationDbContext>();
 
-                if (context.Database.IsSqlServer())
-                    context.Database.Migrate();
-            //}
-            //catch (Exception exp)
-            //{
-            //    throw;
-            //}
+            if (context.Database.IsSqlServer())
+                context.Database.Migrate();
 
             await host.RunAsync();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(builder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    int grpcPort;
+                    int webApiPort;
+
+                    var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+                    if (env == "Development")
+                    {
+                        grpcPort = 5155;
+                        webApiPort = 5100;
+                    }
+
+                    else
+                    {
+                        grpcPort = 666;
+                        webApiPort = 80;
+                    }
+
+                    builder.UseKestrel(options =>
+                    {
+                        options.ListenLocalhost(grpcPort, opt =>
+                        {
+                            opt.Protocols = HttpProtocols.Http2;
+                        });
+                        options.ListenLocalhost(webApiPort, opt =>
+                        {
+                            opt.Protocols = HttpProtocols.Http1;
+                        });
+                        //options.ListenAnyIP(8008, options =>
+                        //{
+                        //    options.Protocols = HttpProtocols.Http1AndHttp2;
+                        //    options.UseHttps();
+                        //});
+                    });
+
+                    builder.UseStartup<Startup>();
                 });
+        }
     }
 }

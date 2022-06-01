@@ -1,0 +1,11 @@
+﻿syntax = "proto3";
+
+import "jwt-validation-messages.proto";
+
+package jwtValidation.service;
+option csharp_namespace = "JwtValidation.Service";
+
+service GrpcJwtValidationService {
+	rpc ValidateJwtToken(jwtValidation.messages.ValidateJwtTokenRequest)
+		returns (jwtValidation.messages.ValidateJwtTokenResponse);
+}

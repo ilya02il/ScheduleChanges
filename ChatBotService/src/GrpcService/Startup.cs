@@ -8,6 +8,10 @@ using Application;
 using Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Mapping;
+using System.Net;
+using Microsoft.AspNetCore.Authentication.Certificate;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace GrpcAPI
 {
@@ -28,6 +32,43 @@ namespace GrpcAPI
             services.AddApplication();
             services.AddInfrastructure(Configuration);
 
+            services.AddAuthentication()
+                /*.AddCertificate(options =>
+                {
+                    options.AllowedCertificateTypes = CertificateTypes.All;
+                    options.Events = new CertificateAuthenticationEvents
+                    {
+                        OnCertificateValidated = context =>
+                        {
+                            var claims = new[]
+                            {
+                                    new Claim(ClaimTypes.Name,
+                                        context.ClientCertificate.Subject,
+                                        ClaimValueTypes.String,
+                                        context.Options.ClaimsIssuer)
+                                };
+
+                            context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name));
+                            context.Success();
+
+                            return Task.CompletedTask;
+                        },
+                        OnAuthenticationFailed = context =>
+                        {
+                            context.NoResult();
+                            context.Response.StatusCode = 403;
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                })*/;
+
+            //services.AddHttpsRedirection(options =>
+            //{
+            //    options.RedirectStatusCode = (int)HttpStatusCode.PermanentRedirect;
+            //    options.HttpsPort = 8008;
+            //});
+
             services.AddGrpc();
         }
 
@@ -38,6 +79,8 @@ namespace GrpcAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 

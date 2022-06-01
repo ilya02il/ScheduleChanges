@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: chat-bots-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-bots-service
+  template:
+    metadata:
+      labels:
+        app: chat-bots-service
+    spec:
+      containers:
+        - name: chat-bots-service
+          image: ilya02il/chat-bots-service:latest
+          
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat-bots-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: chat-bots-service
+  ports:
+  - name: chat-bots-service
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  - name: chat-bots-service
+    protocol: TCP
+    port: 666
+    targetPort: 666

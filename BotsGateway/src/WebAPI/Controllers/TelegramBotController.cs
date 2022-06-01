@@ -5,10 +5,8 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 using WebAPI.Configurations;
 using WebAPI.Keyboard;
 using WebAPI.Services;
@@ -16,7 +14,7 @@ using WebAPI.Services;
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("bots/tg")]
+    [Route(ApiBaseRoute.BaseRoute + "/tg-bot")]
     public class TelegramBotController : ControllerBase
     {
         private readonly TelegramBotConfiguration _botConfig;

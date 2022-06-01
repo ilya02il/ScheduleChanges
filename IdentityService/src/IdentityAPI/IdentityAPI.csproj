@@ -2,9 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>7285f8e4-d499-4ee1-a658-379aac9b54af</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Protos\jwt-validation-service.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.46.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="5.0.13" />
     <PackageReference Include="microsoft.aspnetcore.authentication.jwtbearer" Version="5.0.13" />
     <PackageReference Include="microsoft.aspnetcore.diagnostics.EntityFrameworkCore" Version="5.0.13" />
     <PackageReference Include="microsoft.aspnetcore.identity.EntityFrameworkCore" Version="5.0.13" />
@@ -13,8 +22,20 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
     <PackageReference Include="swashbuckle.aspnetcore.swaggergen" Version="6.3.1" />
     <PackageReference Include="swashbuckle.aspnetcore.swaggerui" Version="6.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <Protobuf Include="Protos\jwt-validation-messages.proto" GrpcServices="None" />
+	  <Protobuf Include="Protos\jwt-validation-service.proto" GrpcServices="Server" ProtoRoot="Protos\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Certs\cert-development.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

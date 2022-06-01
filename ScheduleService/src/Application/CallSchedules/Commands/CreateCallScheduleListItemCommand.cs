@@ -2,6 +2,7 @@
 using Domain.Entities;
 using MediatR;
 using System;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,11 +10,12 @@ namespace Application.CallSchedules.Commands
 {
     public class CreateCallScheduleListItemCommand : IRequest<bool>
     {
-        public Guid EducOrgId { get; init; }
+        [JsonIgnore]
+        public Guid EducOrgId { get; set; }
         public DayOfWeek DayOfWeek { get; init; }
         public int Position { get; init; }
-        public TimeSpan StartTime { get; init; }
-        public TimeSpan EndTime { get; init; }
+        public long StartTime { get; init; }
+        public long EndTime { get; init; }
     }
 
     public class CreateCallScheduleListItemCommandHandler : IRequestHandler<CreateCallScheduleListItemCommand, bool>
@@ -30,8 +32,8 @@ namespace Application.CallSchedules.Commands
             var newEntity = new LessonCallEntity(request.EducOrgId,
                 request.Position,
                 request.DayOfWeek,
-                request.StartTime,
-                request.EndTime);
+                TimeSpan.FromTicks(request.StartTime),
+                TimeSpan.FromTicks(request.EndTime));
 
             _context.LessonCalls.Add(newEntity);
             var result = await _context.SaveChangesAsync(cancellationToken);

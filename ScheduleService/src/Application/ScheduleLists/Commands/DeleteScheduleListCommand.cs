@@ -31,9 +31,11 @@ namespace Application.ScheduleLists.Commands
             var scheduleList = _context.ScheduleLists
                 .FirstOrDefault(sl => sl.Id == request.Id);
             var scheduleListItems = _context.ScheduleListItems
-                .FirstOrDefault(sl => sl.ScheduleListId == scheduleList.Id);
+                .Where(sl => sl.ScheduleListId == scheduleList.Id);
 
-            _context.ScheduleListItems.RemoveRange(scheduleListItems);
+            if (scheduleListItems.Any())
+                _context.ScheduleListItems.RemoveRange(scheduleListItems);
+
             _context.ScheduleLists.Remove(scheduleList);
 
             var result = await _context.SaveChangesAsync(cancellationToken);

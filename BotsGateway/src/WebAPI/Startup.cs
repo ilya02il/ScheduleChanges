@@ -32,7 +32,7 @@ namespace WebAPI
 
             services.AddHttpClient("tgwebhook")
                 .AddTypedClient<ITelegramBotClient>(httpClient
-                    => new TelegramBotClient(Configuration.GetValue<string>(""), httpClient));
+                    => new TelegramBotClient(tgBotConfig.Token, httpClient));
 
             var grpcClientConfig = Configuration.GetConnectionString("ChatBotGrpcServiceConnection");
 

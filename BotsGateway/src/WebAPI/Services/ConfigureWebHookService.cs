@@ -36,7 +36,7 @@ namespace WebAPI.Services
             // If you'd like to make sure that the Webhook request comes from Telegram, we recommend
             // using a secret path in the URL, e.g. https://www.example.com/<token>.
             // Since nobody else knows your bot's token, you can be pretty sure it's us.
-            var webhookAddress = @$"{_botConfig.HostAddress}/bots/tg/{_botConfig.Token}";
+            var webhookAddress = @$"{_botConfig.HostAddress}/{ApiBaseRoute.BaseRoute}/tg-bot/{_botConfig.Token}";
 
             _logger.LogInformation("Setting webhook: {webhookAddress}", webhookAddress);
 

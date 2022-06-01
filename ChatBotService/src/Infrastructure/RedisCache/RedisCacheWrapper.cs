@@ -1,8 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
-using ProtoBuf;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,30 +22,15 @@ namespace Infrastructure.RedisCache
 
             where Tin : class
         {
-            try
+            var serializedObj = JsonConvert.SerializeObject(obj);
+
+            if (options is null)
             {
-                var serializedObj = ProtoSerialize(obj);
-
-                if (options is null)
-                {
-                    await _distributedCache.SetAsync(cacheKey, serializedObj, cancellationToken);
-                    return;
-                }
-
-                await _distributedCache.SetAsync(cacheKey, serializedObj, options, cancellationToken);
+                await _distributedCache.SetStringAsync(cacheKey, serializedObj, cancellationToken);
+                return;
             }
-            catch
-            {
-                var serializedObj = JsonConvert.SerializeObject(obj);
 
-                if (options is null)
-                {
-                    await _distributedCache.SetStringAsync(cacheKey, serializedObj, cancellationToken);
-                    return;
-                }
-
-                await _distributedCache.SetStringAsync(cacheKey, serializedObj, options, cancellationToken);
-            }
+            await _distributedCache.SetStringAsync(cacheKey, serializedObj, options, cancellationToken);
         }
 
         public async Task<Tout> GetStringAsync<Tout>(string cacheKey,
@@ -60,13 +43,6 @@ namespace Infrastructure.RedisCache
                 return null;//here must be logging
 
             return JsonConvert.DeserializeObject<Tout>(serializedObj);
-        }
-
-        private static byte[] ProtoSerialize<Tin>(Tin obj)
-        {
-            using var memStream = new MemoryStream();
-            Serializer.Serialize(memStream, obj);
-            return memStream.ToArray();
         }
     }
 }

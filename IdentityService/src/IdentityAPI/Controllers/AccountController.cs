@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace IdentityAPI.Controllers
 {
     [ApiController]
-    [Route("identity-api/v1/account")]
+    [Route(ApiBaseRoute.BaseRoute + "/account")]
     [Authorize]
     public class AccountController : Controller
     {

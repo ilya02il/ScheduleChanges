@@ -1,0 +1,13 @@
+﻿syntax = "proto3";
+
+package jwtValidation.messages;
+option csharp_namespace = "JwtValidation.Messages";
+
+message ValidateJwtTokenRequest {
+	string token = 1;
+}
+
+message ValidateJwtTokenResponse {
+	bool isValid = 1;
+}
+

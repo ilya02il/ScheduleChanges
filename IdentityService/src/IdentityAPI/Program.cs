@@ -1,26 +1,82 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using IdentityAPI.Data;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using System;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace IdentityAPI
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var host = CreateHostBuilder(args).Build();
+
+            using var scope = host.Services.CreateScope();
+
+            var services = scope.ServiceProvider;
+
+            var context = services.GetRequiredService<ApplicationDbContext>();
+
+            if (context.Database.IsSqlServer())
+                context.Database.Migrate();
+
+            await host.RunAsync();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(builder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    int grpcPort;
+                    int webApiPort;
+
+                    var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+                    if (env == "Development")
+                    {
+                        grpcPort = 5255;
+                        webApiPort = 5001;
+                    }
+
+                    else
+                    {
+                        grpcPort = 666;
+                        webApiPort = 80;
+                    }
+
+                    builder.UseKestrel(options =>
+                    {
+                        //options.ConfigureHttpsDefaults(options =>
+                        //{
+                        //    options.ServerCertificate =
+                        //        new X509Certificate2("Certs\\cert-development.pfx", "93phCKFh_");
+
+                        //    //options.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+                        //});
+
+                        options.ListenAnyIP(grpcPort, opt =>
+                        {
+                            opt.Protocols = HttpProtocols.Http2;
+                        });
+                        options.ListenAnyIP(webApiPort, opt =>
+                        {
+                            opt.Protocols = HttpProtocols.Http1;
+                        });
+                        //options.ListenAnyIP(8080, options =>
+                        //{
+                        //    options.Protocols = HttpProtocols.Http1AndHttp2;
+                        //    options.UseHttps();
+                        //});
+                    });
+
+                    builder.UseStartup<Startup>();
                 });
+        }
     }
 }

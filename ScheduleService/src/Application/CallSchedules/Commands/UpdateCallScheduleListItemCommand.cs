@@ -13,8 +13,8 @@ namespace Application.CallSchedules.Commands
         [JsonIgnore]
         public Guid Id { get; set; }
         public int Position { get; init; }
-        public TimeSpan StartTime { get; init; }
-        public TimeSpan EndTime { get; init; }
+        public long StartTime { get; init; }
+        public long EndTime { get; init; }
     }
 
     public class UpdateCallScheduleListItemCommandHandler : IRequestHandler<UpdateCallScheduleListItemCommand, bool>
@@ -33,8 +33,8 @@ namespace Application.CallSchedules.Commands
 
             entity.UpdateLessonCallInfo(request.Position,
                 entity.DayOfWeek,
-                request.StartTime,
-                request.EndTime);
+                TimeSpan.FromTicks(request.StartTime),
+                TimeSpan.FromTicks(request.EndTime));
 
             var result = await _context.SaveChangesAsync(cancellationToken);
 
