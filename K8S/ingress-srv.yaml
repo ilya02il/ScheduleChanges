@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-srv
+  annotations:
+spec:
+  # tls:
+  # - hosts:
+  #   - test.com
+  #   secretName: tls-secret
+  ingressClassName: nginx
+  rules:
+  - host: xn----7sbbu0boi.xn--p1ai
+    http:
+      paths:
+        - path: /schedule-service-api/v1
+          pathType: Prefix
+          backend:
+            service:
+              name: schedules-clusterip-srv
+              port:
+                number: 80
+        - path: /identity-service-api/v1
+          pathType: Prefix
+          backend:
+            service:
+              name: identity-clusterip-srv
+              port:
+                number: 80
+        - path: /bots-gateway-api/v1
+          pathType: Prefix
+          backend:
+            service:
+              name: bots-gateway-clusterip-srv
+              port:
+                number: 80

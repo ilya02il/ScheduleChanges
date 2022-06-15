@@ -8,6 +8,11 @@ namespace IdentityAPI.Models
         public Guid EducOrgId { get; set; }
 
         public ApplicationUser() : base() { }
+        public ApplicationUser(string username)
+        {
+            UserName = username;
+            EducOrgId = Guid.Empty;
+        }
         public ApplicationUser(string username, Guid educOrgId)
         {
             UserName = username;

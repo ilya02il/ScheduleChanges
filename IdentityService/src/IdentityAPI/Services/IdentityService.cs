@@ -4,6 +4,7 @@ using IdentityAPI.Data;
 using IdentityAPI.Extensions;
 using IdentityAPI.Models;
 using IdentityAPI.Results;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -40,7 +41,7 @@ namespace IdentityAPI.Services
 
         public async Task<AuthenticationResult> LoginAsync(string username,
             string password,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByNameAsync(username)
                 .WithCancellation(cancellationToken);
@@ -60,7 +61,8 @@ namespace IdentityAPI.Services
         public async Task<RegistrationResult> RegisterUserAsync(Guid educOrgId,
             string username,
             string password,
-            CancellationToken cancellationToken)
+            string role,
+            CancellationToken cancellationToken = default)
         {
             var existingUser = await _userManager.FindByNameAsync(username)
                 .WithCancellation(cancellationToken);
@@ -76,12 +78,15 @@ namespace IdentityAPI.Services
             if (!createdUser.Succeeded)
                 return new(createdUser.Errors.Select(e => e.Description));
 
+            if (role is not null)
+                await _userManager.AddToRoleAsync(newUser, role);
+
             return new(true);
         }
 
         public async Task<AuthenticationResult> RefreshTokenAsync(string token,
             string refreshToken,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             var validatedToken = GetPrincipalFromToken(token);
 
@@ -117,7 +122,7 @@ namespace IdentityAPI.Services
                 return new(new[] { "This refresh token has been used." });
 
             if (storedRefreshToken.JwtId != jti)
-                return new(new[] { "This refresh token hasn't been match this JWT/" });
+                return new(new[] { "This refresh token hasn't been match this JWT." });
 
             storedRefreshToken.IsUsed = true;
             _context.RefreshTokens.Update(storedRefreshToken);
@@ -131,7 +136,7 @@ namespace IdentityAPI.Services
         }
 
         private async Task<AuthenticationResult> GenerateAuthResultForUserAsync(ApplicationUser user,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtConfig.Secret);
@@ -172,7 +177,12 @@ namespace IdentityAPI.Services
             _context.RefreshTokens.Add(refreshToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            return new(true, tokenHandler.WriteToken(token), refreshToken.Token);
+            var cookies = new(string, string, CookieOptions)[]
+            {
+                new("X-Refresh-Token", refreshToken.Token, new() { HttpOnly = true })
+            };
+
+            return new(true, tokenHandler.WriteToken(token), cookies);
         }
 
         private ClaimsPrincipal GetPrincipalFromToken(string token)

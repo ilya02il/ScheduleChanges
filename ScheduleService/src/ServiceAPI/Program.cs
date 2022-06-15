@@ -22,7 +22,7 @@ namespace ServiceAPI
             var context = services.GetRequiredService<ApplicationDbContext>();
 
             if (context.Database.IsSqlServer())
-                context.Database.Migrate();
+                await context.Database.MigrateAsync();
 
             await host.RunAsync();
         }

@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 namespace ServiceAPI.Controllers
 {
     [ApiController]
-    //[Authorize]
+    [AuthorizeOnJwtSource(Roles = "Admin, EducOrgManager")]
     [Route(ApiBaseRoute.BaseRoute + "/schedule-changes-lists")]
     public class ScheduleChangesListsController : ControllerBase
     {

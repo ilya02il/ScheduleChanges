@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 
 namespace IdentityAPI.Results
 {
@@ -6,7 +7,7 @@ namespace IdentityAPI.Results
     {
         public string Token { get; init; }
         public bool IsSuccess { get; init; } = false;
-        public string RefreshToken { get; init; }
+        public IEnumerable<(string key, string value, CookieOptions options)> Cookies { get; set; }
         public IEnumerable<string> Errors { get; init; }
 
         public AuthenticationResult(IEnumerable<string> errors)
@@ -14,11 +15,13 @@ namespace IdentityAPI.Results
             Errors = errors;
         }
 
-        public AuthenticationResult(bool isSuccess, string token, string refreshToken)
+        public AuthenticationResult(bool isSuccess,
+            string token,
+            IEnumerable<(string key, string value, CookieOptions options)> cookies)
         {
             IsSuccess = isSuccess;
             Token = token;
-            RefreshToken = refreshToken;
+            Cookies = cookies;
         }
     }
 }

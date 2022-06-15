@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: schedules-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: schedules-service
+  template:
+    metadata:
+      labels:
+        app: schedules-service
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: schedules-service
+          image: ilya02il/schedule-service:latest
+          env:
+          - name: SQL_SERVER_CONNECTION
+            value: "Server=tcp:schedules-mssql-loadbalancer,1433;Database=ScheduleServiceDb;uid=sa;password=93phCKFh_;MultipleActiveResultSets=true;"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: schedules-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: schedules-service
+  ports:
+  - name: schedules-service
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  - name: schedules-grpc
+    protocol: TCP
+    port: 666
+    targetPort: 666

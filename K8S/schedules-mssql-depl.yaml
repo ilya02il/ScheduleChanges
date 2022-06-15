@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: schedules-mssql-depl
@@ -6,15 +6,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: schedules-mssql
+      app: mssql
   template:
-    matadata:
+    metadata:
       labels:
-        app: schedules-mssql
+        app: mssql
     spec:
       containers:
-        - name: schedules-mssql
-          image: mcr.microsoft.com/mssql/server:2019-latest
+        - name: mssql
+          image: mcr.microsoft.com/mssql/server:2017-latest
           ports:
             - containerPort: 1433
           env:
@@ -22,11 +22,11 @@ spec:
             value: "Express"
           - name: ACCEPT_EULA
             value: "Y"
-          -name: SA_PASSWORD
+          - name: SA_PASSWORD
             valueFrom:
-            secretKeyRef:
-              name: mssql
-              key: SA_PASSWORD
+              secretKeyRef:
+                name: mssql
+                key: SA_PASSWORD
           volumeMounts:
           - mountPath: /var/opt/mssql/data
             name: mssqldb
@@ -44,9 +44,9 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: schedules-mssql
+    app: mssql
   ports:
-  - name: schedules-mssql
+  - name: mssql
     protocol: TCP
     port: 1433
     targetPort: 1433
@@ -60,7 +60,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: schedules-mssql
+    app: mssql
   ports:
   - protocol: TCP
     port: 1433

@@ -7,6 +7,7 @@ using System.Reflection;
 using Infrastructure.Files;
 using Domain.Entities;
 using Domain.ValueObjects;
+using System;
 
 namespace Infrastructure
 {
@@ -16,6 +17,7 @@ namespace Infrastructure
         {
             services.AddDbContext<ApplicationDbContext>(builder =>
                 builder.UseSqlServer(
+                    //Environment.GetEnvironmentVariable("SQL_SERVER_CONNECTION"),
                     configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName)),
                 ServiceLifetime.Scoped);

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity-service
+  template:
+    metadata:
+      labels:
+        app: identity-service
+    spec:
+      containers:
+        - name: identity-service
+          image: ilya02il/identity-service:latest
+          env:
+          - name: SQL_SERVER_CONNECTION
+            value: "Server=tcp:identity-mssql-loadbalancer,1433;Database=IdentityServiceDb;uid=sa;password=93phCKFh_;MultipleActiveResultSets=true;"
+          
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: identity-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: identity-service
+  ports:
+  - name: identity-service
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  - name: identity-grpc
+    protocol: TCP
+    port: 666
+    targetPort: 666

@@ -1,5 +1,7 @@
 using IdentityAPI.Data;
+using IdentityAPI.Models;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,9 +23,34 @@ namespace IdentityAPI
             var services = scope.ServiceProvider;
 
             var context = services.GetRequiredService<ApplicationDbContext>();
+            var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
             if (context.Database.IsSqlServer())
-                context.Database.Migrate();
+                await context.Database.MigrateAsync();
+
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                var adminRole = new ApplicationRole("Admin");
+                await roleManager.CreateAsync(adminRole);
+            }
+
+            if (!await roleManager.RoleExistsAsync("EducOrgManager"))
+            {
+                var educOrgManagerRole = new ApplicationRole("EducOrgManager");
+                await roleManager.CreateAsync(educOrgManagerRole);
+            }
+
+            var adminUser = await context.Users
+                .AsNoTracking()
+                .SingleOrDefaultAsync(u => u.UserName == "admin");
+
+            if (adminUser is null)
+            {
+                adminUser = new ApplicationUser("admin");
+                await userManager.CreateAsync(adminUser, "93phCKFh_");
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+            }
 
             await host.RunAsync();
         }

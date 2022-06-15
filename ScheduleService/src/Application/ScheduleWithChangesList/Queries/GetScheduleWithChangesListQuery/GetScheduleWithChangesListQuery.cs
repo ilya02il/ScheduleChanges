@@ -78,8 +78,8 @@ namespace Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesList
                 _context.ScheduleListItems
                     .AsNoTracking()
                     .Where(li => li.ScheduleListId == scheduleList.Id &&
-                        li.IsOddWeek == (isOddWeek ?? true) ||
-                        li.IsOddWeek == null)
+                        (li.IsOddWeek == (isOddWeek ?? true) ||
+                        li.IsOddWeek == null))
                     .OrderBy(li => li.ItemInfo.Position)
                     .ToList();
 

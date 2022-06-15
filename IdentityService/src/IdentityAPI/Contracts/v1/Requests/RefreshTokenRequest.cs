@@ -6,7 +6,5 @@ namespace IdentityAPI.Contracts.v1.Requests
     {
         [Required]
         public string Token { get; init; }
-        [Required]
-        public string RefreshToken { get; init; }
     }
 }

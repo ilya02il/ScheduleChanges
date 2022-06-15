@@ -51,11 +51,11 @@ namespace GrpcAPI
 
                     builder.UseKestrel(options =>
                     {
-                        options.ListenLocalhost(grpcPort, opt =>
+                        options.ListenAnyIP(grpcPort, opt =>
                         {
                             opt.Protocols = HttpProtocols.Http2;
                         });
-                        options.ListenLocalhost(webApiPort, opt =>
+                        options.ListenAnyIP(webApiPort, opt =>
                         {
                             opt.Protocols = HttpProtocols.Http1;
                         });

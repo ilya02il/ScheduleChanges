@@ -16,5 +16,13 @@ namespace Domain.Entities
         {
             Name = name;
         }
+
+        public void UpdateName(string name)
+        {
+            if (name == Name)
+                return;
+
+            Name = name;
+        }
     }
 }

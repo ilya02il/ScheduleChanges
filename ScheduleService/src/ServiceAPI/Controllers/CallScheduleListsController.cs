@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace ServiceAPI.Controllers
 {
     [ApiController]
-    [AuthorizeOnJwtSource]
+    [AuthorizeOnJwtSource(Roles = "Admin, EducOrgManager")]
     [Route(ApiBaseRoute.BaseRoute + "/call-schedule-lists")]
     public class CallScheduleListsController : ControllerBase
     {

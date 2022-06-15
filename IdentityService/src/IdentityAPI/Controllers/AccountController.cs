@@ -11,7 +11,7 @@ namespace IdentityAPI.Controllers
 {
     [ApiController]
     [Route(ApiBaseRoute.BaseRoute + "/account")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class AccountController : Controller
     {
         private readonly IIdentityService _identityService;
@@ -36,7 +36,12 @@ namespace IdentityAPI.Controllers
             if (!authResult.IsSuccess)
                 return BadRequest(new FailResponse(authResult.Errors));
 
-            return Ok(new AuthSuccessResponse(authResult.Token, authResult.RefreshToken));
+            foreach (var (key, value, options) in authResult.Cookies)
+            {
+                Response.Cookies.Append(key, value, options);
+            }
+
+            return Ok(new AuthSuccessResponse(authResult.Token));
         }
 
         [HttpPost("register")]
@@ -49,6 +54,7 @@ namespace IdentityAPI.Controllers
             var registerResult = await _identityService.RegisterUserAsync(request.EducOrgId,
                 request.Username,
                 request.Password,
+                request.Role,
                 cancellationToken);
 
             if (!registerResult.IsSuccess)
@@ -57,18 +63,30 @@ namespace IdentityAPI.Controllers
             return Ok();
         }
 
-        [HttpPost("resfresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request,
-            CancellationToken cancellationToken)
+        [HttpPost("refresh-token")]
+        [Authorize]
+        public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
         {
             if (!ValidateModel(out var result))
                 return result;
 
-            var refreshResult = await _identityService.RefreshTokenAsync(request.Token,
-                request.RefreshToken,
+            var refreshToken = Request.Cookies
+                .FirstOrDefault(c => c.Key == "X-Refresh-Token")
+                .Value;
+
+            var refreshResult = await _identityService.RefreshTokenAsync(GetTokenFromAuthHeader(),
+                refreshToken,
                 cancellationToken);
 
-            return Ok(new AuthSuccessResponse(refreshResult.Token, refreshResult.RefreshToken));
+            if (!refreshResult.IsSuccess)
+                return BadRequest(new FailResponse(refreshResult.Errors));
+
+            foreach (var (key, value, options) in refreshResult.Cookies)
+            {
+                Response.Cookies.Append(key, value, options);
+            }
+
+            return Ok(new AuthSuccessResponse(refreshResult.Token));
         }
 
         private bool ValidateModel(out IActionResult result)
@@ -84,6 +102,14 @@ namespace IdentityAPI.Controllers
 
             result = null;
             return true;
+        }
+
+        private string GetTokenFromAuthHeader()
+        {
+            return HttpContext
+                .Request
+                .Headers["Authorization"]
+                .ToString()[7..];
         }
     }
 }

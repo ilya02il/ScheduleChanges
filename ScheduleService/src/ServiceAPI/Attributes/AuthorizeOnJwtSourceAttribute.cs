@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceAPI.GrpcClients;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ServiceAPI.Attributes
@@ -11,6 +10,11 @@ namespace ServiceAPI.Attributes
     public class AuthorizeOnJwtSourceAttribute 
         : AuthorizeAttribute, IAsyncAuthorizationFilter
     {
+        public AuthorizeOnJwtSourceAttribute(string? Roles = default)
+        {
+            this.Roles = Roles;
+        }
+
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
             if (context.HttpContext.User.Identity?.IsAuthenticated ?? false) // -> first, we need to check if we have some toeken

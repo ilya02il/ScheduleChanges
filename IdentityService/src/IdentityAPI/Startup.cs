@@ -29,6 +29,8 @@ namespace IdentityAPI
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("SqlServerConnection"))
+                ////////
+                //options.UseSqlServer(Environment.GetEnvironmentVariable("SQL_SERVER_CONNECTION"))
                 );
 
             services.AddDatabaseDeveloperPageExceptionFilter();
@@ -70,6 +72,12 @@ namespace IdentityAPI
             });
 
             app.UseRouting();
+
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowAnyOrigin()// allow any origin
+                .AllowCredentials());
 
             app.UseAuthentication();
             app.UseAuthorization();

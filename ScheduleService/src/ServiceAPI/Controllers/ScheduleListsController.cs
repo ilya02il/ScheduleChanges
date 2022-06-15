@@ -3,6 +3,7 @@ using Application.ScheduleLists.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ServiceAPI.Attributes;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 namespace ServiceAPI.Controllers
 {
     [ApiController]
-    //[Authorize]
+    [AuthorizeOnJwtSource(Roles = "Admin, EducOrgManager")]
     [Route(ApiBaseRoute.BaseRoute + "/schedule-lists")]
     public class ScheduleListsController : ControllerBase
     {
@@ -22,7 +23,7 @@ namespace ServiceAPI.Controllers
         }
 
         [HttpGet]
-        //[AllowAnonymous]
+        [AllowAnonymous]
         public async Task<IActionResult> GetScheduleListsByGroupId([FromQuery] Guid groupId,
             CancellationToken cancellationToken)
         {

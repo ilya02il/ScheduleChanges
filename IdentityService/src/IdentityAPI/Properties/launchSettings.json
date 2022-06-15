@@ -4,10 +4,9 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "SQL_SERVER_CONNECTION": "Data Source=DESKTOP-3J0KV7C\\SQLEXPRESS;Database=IdentityServiceDb;Integrated Security=True;MultipleActiveResultSets=true;"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:5001",
+      "applicationUrl": "http://localhost:5001",
       "dotnetRunMessages": true
     },
     "Docker": {

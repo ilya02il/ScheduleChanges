@@ -16,6 +16,7 @@ namespace IdentityAPI.Contracts
         Task<RegistrationResult> RegisterUserAsync(Guid educOrgId,
             string username,
             string password,
+            string role,
             CancellationToken cancellationToken);
     }
 }

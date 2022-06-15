@@ -46,11 +46,11 @@ namespace ServiceAPI
             });
             services.AddScoped<JwtValidationServiceGrpcClient>();
 
-            services.AddHttpsRedirection(options =>
-            {
-                options.RedirectStatusCode = (int)HttpStatusCode.PermanentRedirect;
-                options.HttpsPort = 80;
-            });
+            //services.AddHttpsRedirection(options =>
+            //{
+            //    options.RedirectStatusCode = (int)HttpStatusCode.PermanentRedirect;
+            //    options.HttpsPort = 80;
+            //});
 
             services.AddControllers();
 
@@ -66,7 +66,7 @@ namespace ServiceAPI
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseSwagger(options =>
             {
@@ -79,6 +79,12 @@ namespace ServiceAPI
             });
 
             app.UseRouting();
+
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true)// allow any origin
+                .AllowCredentials());
 
             app.UseAuthentication();
             app.UseAuthorization();

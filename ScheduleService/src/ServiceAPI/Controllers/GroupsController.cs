@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace ServiceAPI.Controllers
 {
     [ApiController]
-    [AuthorizeOnJwtSource]
+    [AuthorizeOnJwtSource(Roles = "Admin, EducOrgManager")]
     [Route(ApiBaseRoute.BaseRoute + "/groups")]
     public class GroupsController : ControllerBase
     {

@@ -3,12 +3,10 @@
     public class AuthSuccessResponse
     {
         public string Token { get; init; }
-        public string RefreshToken { get; init; }
 
-        public AuthSuccessResponse(string token, string refreshToken)
+        public AuthSuccessResponse(string token)
         {
             Token = token;
-            RefreshToken = refreshToken;
         }
     }
 }
