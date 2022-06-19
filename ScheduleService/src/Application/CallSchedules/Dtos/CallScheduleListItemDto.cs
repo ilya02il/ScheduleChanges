@@ -6,7 +6,7 @@ namespace Application.CallSchedules.Dtos
     {
         public Guid Id { get; init; }
         public int Position { get; init; }
-        public long StartTime { get; init; }
-        public long EndTime { get; init; }
+        public string StartTime { get; init; }
+        public string EndTime { get; init; }
     }
 }

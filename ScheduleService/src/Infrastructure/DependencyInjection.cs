@@ -1,29 +1,26 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Application.Common.Interfaces;
-using Infrastructure.EF;
-using System.Reflection;
-using Infrastructure.Files;
-using Domain.Entities;
+﻿using Application.Common.Interfaces;
 using Domain.ValueObjects;
-using System;
+using Infrastructure.EF;
+using Infrastructure.Files;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, string sqlServerConnection)
         {
             services.AddDbContext<ApplicationDbContext>(builder =>
                 builder.UseSqlServer(
-                    //Environment.GetEnvironmentVariable("SQL_SERVER_CONNECTION"),
-                    configuration.GetConnectionString("DefaultConnection"),
+                    sqlServerConnection,
                     b => b.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName)),
                 ServiceLifetime.Scoped);
 
             services.AddScoped<IApplicationDbContext>(provider => provider.GetService<ApplicationDbContext>());
             services.AddTransient<ITableFileParser<ItemInfo>, WordTableFileParser<ItemInfo>>();
+
 
             return services;
         }

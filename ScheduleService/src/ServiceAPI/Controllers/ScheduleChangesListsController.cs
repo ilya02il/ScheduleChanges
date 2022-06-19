@@ -53,8 +53,11 @@ namespace ServiceAPI.Controllers
         public async Task<IActionResult> GetBriefScheduleChangesListByEducOrgId([FromQuery] Guid educOrgId,
             CancellationToken cancellationToken)
         {
-            if (educOrgId == Guid.Empty)
-                BadRequest("The user claims don't contain an educational organization id claim.");
+            bool isParsed = Guid.TryParse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType),
+                out Guid eoId);
+
+            if (isParsed)
+                educOrgId = eoId;
 
             var query = new GetBriefScheduleChangesListsQuery(educOrgId);
             var senderResponse = await _sender.Send(query, cancellationToken);

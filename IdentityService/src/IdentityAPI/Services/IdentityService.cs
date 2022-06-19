@@ -107,7 +107,7 @@ namespace IdentityAPI.Services
                 .Value;
 
             var storedRefreshToken = _context.RefreshTokens
-                .SingleOrDefault(rt => rt.Token == refreshToken);
+                .FirstOrDefault(rt => rt.Token == refreshToken);
 
             if (storedRefreshToken is null)
                 return new(new[] { "This refresh token does not exist." });
@@ -179,7 +179,15 @@ namespace IdentityAPI.Services
 
             var cookies = new(string, string, CookieOptions)[]
             {
-                new("X-Refresh-Token", refreshToken.Token, new() { HttpOnly = true })
+                new("X-Refresh-Token",
+                    refreshToken.Token,
+                    new()
+                    {
+                        HttpOnly = true,
+                        //Secure = false,
+                        //SameSite = SameSiteMode.None
+                    }
+                )
             };
 
             return new(true, tokenHandler.WriteToken(token), cookies);

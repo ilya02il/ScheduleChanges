@@ -26,8 +26,7 @@ namespace IdentityAPI
             var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-            if (context.Database.IsSqlServer())
-                await context.Database.MigrateAsync();
+            context.Database.EnsureCreated();
 
             if (!await roleManager.RoleExistsAsync("Admin"))
             {
@@ -73,8 +72,8 @@ namespace IdentityAPI
 
                     else
                     {
-                        grpcPort = 666;
-                        webApiPort = 80;
+                        grpcPort = Convert.ToInt32(Environment.GetEnvironmentVariable("GRPC_PORT"));
+                        webApiPort = Convert.ToInt32(Environment.GetEnvironmentVariable("WEB_API_PORT"));
                     }
 
                     builder.UseKestrel(options =>

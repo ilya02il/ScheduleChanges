@@ -14,20 +14,38 @@ namespace Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
+            string sqlServerConnection, redisConnection, grpcScheduleSrvConnection;
+
+            if (isDevelopment)
+            {
+                sqlServerConnection = configuration.GetConnectionString("SqlServerConnection");
+                redisConnection = configuration.GetConnectionString("RedisConnection");
+                grpcScheduleSrvConnection = configuration.GetConnectionString("GrpcScheduleServiceConnection");
+            }
+
+            else
+            {
+                sqlServerConnection = Environment.GetEnvironmentVariable("SQL_SERVER_CONNECTION");
+                redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
+                grpcScheduleSrvConnection = Environment.GetEnvironmentVariable("GRPC_SCHEDULE_SRV_CONNECTION");
+            }
+
             services.AddDbContext<ApplicationDbContext>(builder =>
                 builder.UseSqlServer(
-                    configuration.GetConnectionString("SqlServerConnection"),
+                    sqlServerConnection,
                     b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)),
                 ServiceLifetime.Scoped);
 
             services.AddDistributedRedisCache(options =>
             {
-                options.Configuration = configuration.GetConnectionString("RedisConnection");
+                options.Configuration = redisConnection;
             });
 
             services.AddGrpcClient<GrpcSchedule.GrpcScheduleClient>(options =>
             {
-                options.Address = new Uri(configuration.GetConnectionString("GrpcScheduleServiceConnection"));
+                options.Address = new Uri(grpcScheduleSrvConnection);
             });
 
             services.AddScoped<IApplicationDbContext>(provider => 

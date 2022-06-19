@@ -10,7 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Net;
 
 namespace IdentityAPI
 {
@@ -18,19 +17,23 @@ namespace IdentityAPI
     {
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public IConfiguration Configuration { get; set; }
+        public IConfiguration Configuration { get; init; }
+        public IWebHostEnvironment Env { get; init; }
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            Env = env;
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var connectionString = Env.IsDevelopment() ? 
+                Configuration.GetConnectionString("SqlServerConnection") : 
+                Environment.GetEnvironmentVariable("SQL_SERVER_CONNECTION");
+
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("SqlServerConnection"))
-                ////////
-                //options.UseSqlServer(Environment.GetEnvironmentVariable("SQL_SERVER_CONNECTION"))
+                options.UseSqlServer(connectionString)
                 );
 
             services.AddDatabaseDeveloperPageExceptionFilter();
@@ -49,6 +52,8 @@ namespace IdentityAPI
 
             services.AddGrpc();
             services.AddControllers();
+
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -74,9 +79,9 @@ namespace IdentityAPI
             app.UseRouting();
 
             app.UseCors(x => x
+                .SetIsOriginAllowed(origin => true)// allow any origin
                 .AllowAnyMethod()
                 .AllowAnyHeader()
-                .AllowAnyOrigin()// allow any origin
                 .AllowCredentials());
 
             app.UseAuthentication();

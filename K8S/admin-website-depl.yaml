@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-website-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-website
+  template:
+    metadata:
+      labels:
+        app: admin-website
+    spec:
+      containers:
+        - name: admin-website
+          image: dev3l/node-react-webpack-hello-world
+          # env:
+          # - name: SQL_SERVER_CONNECTION
+          #   value: "Server=tcp:chat-bots-mssql-clusterip-srv,1433;Database=ChatBotServiceDb;uid=sa;password=93phCKFh_;MultipleActiveResultSets=true;"
+          # - name: REDIS_CONNECTION
+          #   value: "http://redis-clusterip-srv:6379"
+          # - name: GRPC_SCHEDULE_SRV_CONNECTION
+          #   value: "http://schedules-clusterip-srv:666"
+          # - name: WEB_API_PORT
+          #   value: "80"
+          # - name: GRPC_PORT
+          #   value: "666"
+          
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-website-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: admin-website
+  ports:
+  - name: admin-website
+    protocol: TCP
+    port: 8080
+    targetPort: 8080

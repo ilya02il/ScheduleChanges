@@ -1,7 +1,6 @@
 using Infrastructure.EF;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -21,8 +20,7 @@ namespace ServiceAPI
 
             var context = services.GetRequiredService<ApplicationDbContext>();
 
-            if (context.Database.IsSqlServer())
-                await context.Database.MigrateAsync();
+            await context.Database.EnsureCreatedAsync();
 
             await host.RunAsync();
         }
@@ -45,8 +43,8 @@ namespace ServiceAPI
 
                     else
                     {
-                        grpcPort = 666;
-                        webApiPort = 80;
+                        grpcPort = Convert.ToInt32(Environment.GetEnvironmentVariable("GRPC_PORT"));
+                        webApiPort = Convert.ToInt32(Environment.GetEnvironmentVariable("WEB_API_PORT"));
                     }
 
                     builder.UseKestrel(options =>

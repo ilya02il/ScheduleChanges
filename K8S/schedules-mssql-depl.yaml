@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: mssql
-          image: mcr.microsoft.com/mssql/server:2017-latest
+          image: mcr.microsoft.com/mssql/server:2019-latest
           ports:
             - containerPort: 1433
           env:
@@ -23,17 +23,14 @@ spec:
           - name: ACCEPT_EULA
             value: "Y"
           - name: SA_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: mssql
-                key: SA_PASSWORD
+            value: "93phCKFh_"
           volumeMounts:
           - mountPath: /var/opt/mssql/data
             name: mssqldb
       volumes:
       - name: mssqldb
         persistentVolumeClaim:
-          claimName: mssql-claim
+          claimName: schedule-mssql-claim
 
 ---
 

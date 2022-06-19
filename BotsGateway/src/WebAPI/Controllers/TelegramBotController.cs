@@ -36,6 +36,8 @@ namespace WebAPI.Controllers
             [FromBody] Update update,
             CancellationToken cancellationToken)
         {
+            return;
+
             if (string.IsNullOrEmpty(botToken) || botToken != _botConfig.Token)
                 throw new ArgumentException("Token: {token} is not valid for a bot.", botToken);
 

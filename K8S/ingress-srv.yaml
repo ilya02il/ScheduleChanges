@@ -10,9 +10,27 @@ spec:
   #   secretName: tls-secret
   ingressClassName: nginx
   rules:
-  - host: xn----7sbbu0boi.xn--p1ai
+  # - host: test.com
+  #   http:
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
+  #         backend:
+  #           service:
+  #             name: admin-website-clusterip-srv
+  #             port:
+  #               number: 8080
+  # - host: api.test.com
+  - host:
     http:
       paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: admin-website-clusterip-srv
+              port:
+                number: 8080
         - path: /schedule-service-api/v1
           pathType: Prefix
           backend:

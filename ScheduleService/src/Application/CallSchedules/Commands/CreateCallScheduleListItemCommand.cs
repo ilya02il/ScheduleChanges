@@ -14,8 +14,8 @@ namespace Application.CallSchedules.Commands
         public Guid EducOrgId { get; set; }
         public DayOfWeek DayOfWeek { get; init; }
         public int Position { get; init; }
-        public long StartTime { get; init; }
-        public long EndTime { get; init; }
+        public string StartTime { get; init; }
+        public string EndTime { get; init; }
     }
 
     public class CreateCallScheduleListItemCommandHandler : IRequestHandler<CreateCallScheduleListItemCommand, bool>
@@ -32,8 +32,8 @@ namespace Application.CallSchedules.Commands
             var newEntity = new LessonCallEntity(request.EducOrgId,
                 request.Position,
                 request.DayOfWeek,
-                TimeSpan.FromTicks(request.StartTime),
-                TimeSpan.FromTicks(request.EndTime));
+                TimeSpan.Parse(request.StartTime),
+                TimeSpan.Parse(request.EndTime));
 
             _context.LessonCalls.Add(newEntity);
             var result = await _context.SaveChangesAsync(cancellationToken);

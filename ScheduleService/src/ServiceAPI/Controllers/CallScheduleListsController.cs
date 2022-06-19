@@ -32,6 +32,12 @@ namespace ServiceAPI.Controllers
             [FromQuery] DayOfWeek dayOfWeek,
             CancellationToken cancellationToken)
         {
+            bool isParsed = Guid.TryParse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType),
+                out Guid eoId);
+
+            if (isParsed)
+                educOrgId = eoId;
+
             var senderRequest = new GetCallScheduleListQuery(educOrgId, dayOfWeek);
 
             var senderResponse = await _sender.Send(senderRequest, cancellationToken);

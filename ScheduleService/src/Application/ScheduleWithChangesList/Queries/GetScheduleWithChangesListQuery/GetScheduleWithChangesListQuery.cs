@@ -83,6 +83,15 @@ namespace Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesList
                     .OrderBy(li => li.ItemInfo.Position)
                     .ToList();
 
+            if (scheduleListItems is null)
+                return new ScheduleWithChangesDto()
+                {
+                    EducOrgName = request.EducOrgName,
+                    GroupNumber = request.GroupNumber,
+                    Date = request.Date,
+                    ScheduleItems = new List<ScheduleWithChangesListItemDto>()
+                };
+
             var resultItemsList = new List<ScheduleWithChangesListItemDto>();
 
             IQueryable<LessonCallEntity> lessonCalls = _context.DatedLessonCalls

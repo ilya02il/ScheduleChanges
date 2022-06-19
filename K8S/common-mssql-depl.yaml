@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: identity-mssql-depl
+  name: common-mssql-depl
 spec:
   replicas: 1
   selector:
@@ -30,14 +30,14 @@ spec:
       volumes:
       - name: mssqldb
         persistentVolumeClaim:
-          claimName: identity-mssql-claim
+          claimName: mssql-claim
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: identity-mssql-clusterip-srv
+  name: common-mssql-clusterip-srv
 spec:
   type: ClusterIP
   selector:
@@ -53,7 +53,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: identity-mssql-loadbalancer
+  name: common-mssql-loadbalancer
 spec:
   type: LoadBalancer
   selector:
@@ -62,4 +62,3 @@ spec:
   - protocol: TCP
     port: 1433
     targetPort: 1433
-

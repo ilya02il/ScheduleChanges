@@ -84,22 +84,22 @@ namespace Application.ChatEntities.Commands.HandleMessageCommand
 
         private async Task<DatedScheduleDto> GetDatedSchedule(object sender, GetDatedScheduleEventArgs args)
         {
-            var cacheKey = CacheKeyHelper.CreateHashedCacheKeyFromProps(args,
-                arg => arg.Date.Date,
-                arg => arg.EducOrgName,
-                arg => arg.GroupNumber);
+            //var cacheKey = CacheKeyHelper.CreateHashedCacheKeyFromProps(args,
+            //    arg => arg.Date.Date,
+            //    arg => arg.EducOrgName,
+            //    arg => arg.GroupNumber);
 
-            var result = await _distributedCache.GetStringAsync<DatedScheduleDto>(cacheKey);
+            //var result = await _distributedCache.GetStringAsync<DatedScheduleDto>(cacheKey);
 
-            if (result is null)
-            {
+            //if (result is null)
+            //{
                 var educInfo = new EducationalInfo()
                 {
                     EducOrgName = args.EducOrgName,
                     GroupNumber = args.GroupNumber
                 };
 
-                result = await _grpcClient.GetDatedSchedule(educInfo, args.Date);
+                var result = await _grpcClient.GetDatedSchedule(educInfo, args.Date);
 
                 if (result is null)
                     throw new Exception("Dated schedule is not found.");
@@ -108,8 +108,8 @@ namespace Application.ChatEntities.Commands.HandleMessageCommand
                     .SetSlidingExpiration(TimeSpan.FromHours(6))
                     .SetAbsoluteExpiration(DateTime.UtcNow.AddHours(12));
 
-                await _distributedCache.SetStringAsync(result, cacheKey, options);
-            }
+            //    await _distributedCache.SetStringAsync(result, cacheKey, options);
+            //}
 
             return result;
         }

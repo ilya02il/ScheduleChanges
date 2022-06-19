@@ -23,7 +23,22 @@ namespace WebAPI.Services
         {
             _logger = logger;
             _services = serviceProvider;
-            _botConfig = configuration.GetSection("TelegramBotConfiguration").Get<TelegramBotConfiguration>();
+
+            var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
+            if (isDevelopment)
+            {
+                _botConfig = configuration.GetSection("TelegramBotConfiguration").Get<TelegramBotConfiguration>();
+            }
+
+            else
+            {
+                _botConfig = new TelegramBotConfiguration
+                {
+                    Token = Environment.GetEnvironmentVariable("TG_BOT_TOKEN"),
+                    HostAddress = Environment.GetEnvironmentVariable("HOST")
+                };
+            }
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

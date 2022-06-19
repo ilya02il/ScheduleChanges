@@ -28,7 +28,7 @@ namespace ServiceAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetGroupsListByEducOrgId(CancellationToken cancellationToken)
         {
-            var educOrgId = Guid.Parse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType));
+            Guid.TryParse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType), out Guid educOrgId);
 
             var query = new GetGroupsByEducOrgIdQuery(educOrgId);
             var senderResponse = await _sender.Send(query, cancellationToken);
@@ -41,6 +41,12 @@ namespace ServiceAPI.Controllers
         public async Task<IActionResult> GetBriefGroupsByEducOrgId([FromQuery] Guid educOrgId,
             CancellationToken cancellationToken)
         {
+            bool isParsed = Guid.TryParse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType),
+                out Guid eoId);
+
+            if (isParsed)
+                educOrgId = eoId;
+
             var query = new GetBriefGroupsByEducOrgIdQuery(educOrgId);
             var senderResponse = await _sender.Send(query, cancellationToken);
 

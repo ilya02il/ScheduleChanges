@@ -11,7 +11,6 @@ namespace IdentityAPI.Controllers
 {
     [ApiController]
     [Route(ApiBaseRoute.BaseRoute + "/account")]
-    [Authorize(Roles = "Admin")]
     public class AccountController : Controller
     {
         private readonly IIdentityService _identityService;
@@ -45,6 +44,7 @@ namespace IdentityAPI.Controllers
         }
 
         [HttpPost("register")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request,
             CancellationToken cancellationToken)
         {

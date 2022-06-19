@@ -17,8 +17,12 @@ spec:
           image: ilya02il/identity-service:latest
           env:
           - name: SQL_SERVER_CONNECTION
-            value: "Server=tcp:identity-mssql-loadbalancer,1433;Database=IdentityServiceDb;uid=sa;password=93phCKFh_;MultipleActiveResultSets=true;"
-          
+            value: "Server=tcp:common-mssql-clusterip-srv,1433;Database=IdentityServiceDb;uid=sa;password=93phCKFh_;MultipleActiveResultSets=true;"
+          - name: WEB_API_PORT
+            value: "80"
+          - name: GRPC_PORT
+            value: "666"
+
 ---
 
 apiVersion: v1

@@ -45,8 +45,8 @@ namespace GrpcAPI
 
                     else
                     {
-                        grpcPort = 666;
-                        webApiPort = 80;
+                        grpcPort = Convert.ToInt32(Environment.GetEnvironmentVariable("GRPC_PORT"));
+                        webApiPort = Convert.ToInt32(Environment.GetEnvironmentVariable("WEB_API_PORT"));
                     }
 
                     builder.UseKestrel(options =>

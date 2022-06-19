@@ -25,20 +25,35 @@ namespace WebAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHostedService<ConfigureWebhook>();
+            string grpcChatBotServiceConnection, tgBotToken, hostAddress;
 
-            var tgBotConfig = Configuration.GetSection("TelegramBotConfiguration")
-                .Get<TelegramBotConfiguration>();
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                grpcChatBotServiceConnection = Configuration.GetConnectionString("ChatBotGrpcServiceConnection");
+
+                var tgBotConfig = Configuration.GetSection("TelegramBotConfiguration")
+                    .Get<TelegramBotConfiguration>();
+
+                tgBotToken = tgBotConfig.Token;
+                hostAddress = tgBotConfig.HostAddress;
+            }
+
+            else
+            {
+                grpcChatBotServiceConnection = Environment.GetEnvironmentVariable("GRPC_CHAT_BOT_SRV_CONNECTION");
+                tgBotToken = Environment.GetEnvironmentVariable("TG_BOT_TOKEN");
+                hostAddress = Environment.GetEnvironmentVariable("HOST");
+            }
+
+            services.AddHostedService<ConfigureWebhook>();
 
             services.AddHttpClient("tgwebhook")
                 .AddTypedClient<ITelegramBotClient>(httpClient
-                    => new TelegramBotClient(tgBotConfig.Token, httpClient));
-
-            var grpcClientConfig = Configuration.GetConnectionString("ChatBotGrpcServiceConnection");
+                    => new TelegramBotClient(tgBotToken, httpClient));
 
             services.AddGrpcClient<GrpcChatBot.GrpcChatBotClient>(options =>
             {
-                options.Address = new Uri(grpcClientConfig);
+                options.Address = new Uri(grpcChatBotServiceConnection);
             });
 
             services.AddScoped<TelegramBotService>();

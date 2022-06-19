@@ -15,6 +15,13 @@ spec:
       containers:
         - name: bots-gateway
           image: ilya02il/bots-gateway:latest
+          env:
+          - name: GRPC_CHAT_BOT_SRV_CONNECTION
+            value: "http://chat-bots-clusterip-srv:666"
+          - name: TG_BOT_TOKEN
+            value: "5263166008:AAEnSw0_oYrZjzaQPQ3xuV0C9EYGjTjEqmc"
+          - name: HOST
+            value: "https://1ccf-171-33-248-232.jp.ngrok.io"
 
 ---
 

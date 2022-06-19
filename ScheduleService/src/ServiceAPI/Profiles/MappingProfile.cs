@@ -58,8 +58,8 @@ namespace ServiceAPI.Profiles
             ////////////////////////////////////////
 
             CreateMap<LessonCallEntity, CallScheduleListItemDto>()
-                .ForMember(dest => dest.StartTime, act => act.MapFrom(src => src.StartTime.Ticks))
-                .ForMember(dest => dest.EndTime, act => act.MapFrom(src => src.EndTime.Ticks));
+                .ForMember(dest => dest.StartTime, act => act.MapFrom(src => src.StartTime.ToString(@"hh\:mm")))
+                .ForMember(dest => dest.EndTime, act => act.MapFrom(src => src.EndTime.ToString(@"hh\:mm")));
 
             CreateMap<GroupEntity, GroupDto>();
 

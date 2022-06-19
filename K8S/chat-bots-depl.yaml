@@ -15,6 +15,17 @@ spec:
       containers:
         - name: chat-bots-service
           image: ilya02il/chat-bot-service:latest
+          env:
+          - name: SQL_SERVER_CONNECTION
+            value: "Server=tcp:common-mssql-clusterip-srv,1433;Database=ChatBotServiceDb;uid=sa;password=93phCKFh_;MultipleActiveResultSets=true;"
+          - name: REDIS_CONNECTION
+            value: "redis-clusterip-srv:6379"
+          - name: GRPC_SCHEDULE_SRV_CONNECTION
+            value: "http://schedules-clusterip-srv:666"
+          - name: WEB_API_PORT
+            value: "80"
+          - name: GRPC_PORT
+            value: "666"
           
 ---
 
