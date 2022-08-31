@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Reflection;
 
@@ -8,16 +7,18 @@ namespace Domain
 {
     public static class BotResponsesStrings
     {
-        private static readonly string _path = "bot_responses.json";
-        public static Dictionary<string, string> GetResponsesStrings()
+        private const string FileName = "bot_responses.json";
+        private static readonly ConcurrentDictionary<string, string> _responses;
+
+        static BotResponsesStrings()
         {
             var dirPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            using var reader = new StreamReader(Path.Combine(dirPath, _path));
+            using var reader = new StreamReader(Path.Combine(dirPath, FileName));
 
             var fileText = reader.ReadToEnd();
-            var result = JsonConvert.DeserializeObject<Dictionary<string, string>>(fileText);
-
-            return result;
+            _responses = JsonConvert.DeserializeObject<ConcurrentDictionary<string, string>>(fileText);
         }
+
+        public static ConcurrentDictionary<string, string> ResponsesStrings => _responses;
     }
 }

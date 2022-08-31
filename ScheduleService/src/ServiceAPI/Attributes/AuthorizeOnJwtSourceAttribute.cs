@@ -17,7 +17,7 @@ namespace ServiceAPI.Attributes
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            if (context.HttpContext.User.Identity?.IsAuthenticated ?? false) // -> first, we need to check if we have some toeken
+            if (context.HttpContext.User.Identity?.IsAuthenticated ?? false)
             {
                 var authorizationService = context.HttpContext
                     .RequestServices

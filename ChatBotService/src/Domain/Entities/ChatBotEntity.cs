@@ -27,7 +27,7 @@ namespace Domain.Entities
         public bool IsAwaiting { get; private set; } = false;
 
         private readonly Dictionary<BotStates, StateActionDelegate> _statesActions;
-        private readonly Dictionary<string, string> _responses = BotResponsesStrings.GetResponsesStrings();
+        private readonly IDictionary<string, string> _responses = BotResponsesStrings.ResponsesStrings;
         private readonly List<string> _messages = new();
 
         private DateTimeOffset _messageDate;
