@@ -27,9 +27,9 @@ namespace Application.Groups.Commands
 
     public class UpdateGroupCommandHandler : IRequestHandler<UpdateGroupCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public UpdateGroupCommandHandler(IApplicationDbContext context)
+        public UpdateGroupCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }

@@ -2,30 +2,28 @@
 using Domain.Entities;
 using MediatR;
 using System;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Groups.Commands
 {
-    public class CreateGroupCommand : IRequest<bool>
+    public class CreateGroupCommand : IRequest<Guid>
     {
-        [JsonIgnore]
         public Guid EducOrgId { get; set; }
         public string GroupNumber { get; init; }
         public int YearOfStudy { get; init; }
     }
 
-    public class CreateGroupCommandHandler : IRequestHandler<CreateGroupCommand, bool>
+    public class CreateGroupCommandHandler : IRequestHandler<CreateGroupCommand, Guid>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public CreateGroupCommandHandler(IApplicationDbContext context)
+        public CreateGroupCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }
 
-        public async Task<bool> Handle(CreateGroupCommand request,
+        public async Task<Guid> Handle(CreateGroupCommand request,
             CancellationToken cancellationToken)
         {
             var newGroup = new GroupEntity(request.EducOrgId,
@@ -35,7 +33,10 @@ namespace Application.Groups.Commands
             _context.Groups.Add(newGroup);
             var result = await _context.SaveChangesAsync(cancellationToken);
 
-            return result > 0;
+            if (result <= 0)
+                throw new Exception("The group has not been created.");
+
+            return newGroup.Id;
         }
     }
 }

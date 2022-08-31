@@ -3,19 +3,19 @@ using System;
 
 namespace Domain.Entities
 {
-    public class LessonCallEntity : Entity
+    public class LessonCallEntity : EntityBase
     {
         public int Position { get; private set; }
         public DayOfWeek DayOfWeek { get; private set; }
-        public TimeSpan StartTime { get; private set; }
-        public TimeSpan EndTime { get; private set; }
+        public long StartTime { get; private set; }
+        public long EndTime { get; private set; }
 
         public Guid EducationalOrgId { get; private set; }
         public EducationalOrgEntity EducationalOrg { get; private set; }
 
         protected LessonCallEntity() : base() { }
 
-        public LessonCallEntity(Guid educOrgId, int position, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
+        public LessonCallEntity(Guid educOrgId, int position, DayOfWeek dayOfWeek, long startTime, long endTime)
         {
             EducationalOrgId = educOrgId;
             Position = position;
@@ -24,7 +24,7 @@ namespace Domain.Entities
             EndTime = endTime;
         }
 
-        public void UpdateLessonCallInfo(int position, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
+        public void UpdateLessonCallInfo(int position, DayOfWeek dayOfWeek, long startTime, long endTime)
         {
             Position = position;
             DayOfWeek = dayOfWeek;

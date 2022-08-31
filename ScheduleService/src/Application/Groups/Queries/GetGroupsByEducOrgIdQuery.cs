@@ -1,12 +1,9 @@
 ﻿using Application.Common.Interfaces;
 using Application.Groups.Dtos;
-using AutoMapper;
-using Domain.Entities;
+using Dapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,24 +21,38 @@ namespace Application.Groups.Queries
 
     public class GetGroupsByEducOrgIdQueryHandler : IRequestHandler<GetGroupsByEducOrgIdQuery, IEnumerable<GroupDto>>
     {
-        private readonly IApplicationDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IReadDapperContext _context;
+        //private readonly IMapper _mapper;
 
-        public GetGroupsByEducOrgIdQueryHandler(IApplicationDbContext context,
-            IMapper mapper)
+        public GetGroupsByEducOrgIdQueryHandler(IReadDapperContext context
+            /*IMapper mapper*/)
         {
             _context = context;
-            _mapper = mapper;
+            //_mapper = mapper;
         }
 
         public async Task<IEnumerable<GroupDto>> Handle(GetGroupsByEducOrgIdQuery request, CancellationToken cancellationToken)
         {
-            var groups = await _context.Groups
-                .AsNoTracking()
-                .Where(g => g.EducationalOrgId == request.EducOrgId)
-                .ToListAsync(cancellationToken);
+            using var connection = _context.CreateConnection();
 
-            return _mapper.Map<List<GroupDto>>(groups);
+            var query =
+                $@"select
+                    Groups.Id as {nameof(GroupDto.Id)},
+                    GroupNumber as {nameof(GroupDto.GroupNumber)},
+                    YearOfStudy as {nameof(GroupDto.YearOfStudy)}
+                from Groups
+                where
+                    EducationalOrgId = @{nameof(request.EducOrgId)}
+                order by
+                    {nameof(GroupDto.YearOfStudy)},
+                    {nameof(GroupDto.GroupNumber)}";
+
+            var command = new CommandDefinition(query,
+                    new { request.EducOrgId },
+                    cancellationToken: cancellationToken
+                );
+
+            return await connection.QueryAsync<GroupDto>(command);
         }
     }
 }

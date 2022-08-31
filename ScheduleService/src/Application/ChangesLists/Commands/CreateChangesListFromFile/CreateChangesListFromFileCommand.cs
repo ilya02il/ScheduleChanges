@@ -21,10 +21,10 @@ namespace Application.ChangesLists.Commands.CreateChangesListFromFile
 
     public class CreateChangesListFromStreamCommandHandler : IRequestHandler<CreateChangesListFromFileCommand, int>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
         private readonly ITableFileParser<ItemInfo> _fileParser;
 
-        public CreateChangesListFromStreamCommandHandler(IApplicationDbContext context, ITableFileParser<ItemInfo> fileParser)
+        public CreateChangesListFromStreamCommandHandler(IWriteDbContext context, ITableFileParser<ItemInfo> fileParser)
         {
             _context = context;
             _fileParser = fileParser;

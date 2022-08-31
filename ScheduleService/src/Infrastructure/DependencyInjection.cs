@@ -1,10 +1,10 @@
 ﻿using Application.Common.Interfaces;
 using Domain.ValueObjects;
-using Infrastructure.EF;
 using Infrastructure.Files;
+using Infrastructure.ReadData;
+using Infrastructure.WriteData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace Infrastructure
 {
@@ -12,13 +12,14 @@ namespace Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, string sqlServerConnection)
         {
-            services.AddDbContext<ApplicationDbContext>(builder =>
+            services.AddDbContext<EFWriteDbContext>(builder =>
                 builder.UseSqlServer(
                     sqlServerConnection,
-                    b => b.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName)),
+                    b => b.MigrationsAssembly(typeof(EFWriteDbContext).Assembly.FullName)),
                 ServiceLifetime.Scoped);
 
-            services.AddScoped<IApplicationDbContext>(provider => provider.GetService<ApplicationDbContext>());
+            services.AddScoped<IWriteDbContext>(provider => provider.GetService<EFWriteDbContext>());
+            services.AddScoped<IReadDapperContext>(fact => new DapperContext(sqlServerConnection));
             services.AddTransient<ITableFileParser<ItemInfo>, WordTableFileParser<ItemInfo>>();
 
 

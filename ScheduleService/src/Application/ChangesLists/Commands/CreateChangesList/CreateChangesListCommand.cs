@@ -21,9 +21,9 @@ namespace Application.ChangesLists.Commands.CreateChangesList
 
     public class CreateChangesListCommandHandler : IRequestHandler<CreateChangesListCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public CreateChangesListCommandHandler(IApplicationDbContext context)
+        public CreateChangesListCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }

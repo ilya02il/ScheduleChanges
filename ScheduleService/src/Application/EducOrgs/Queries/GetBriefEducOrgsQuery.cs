@@ -1,9 +1,8 @@
 ﻿using Application.Common.Interfaces;
 using Application.EducOrgs.Dtos;
+using Dapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,19 +14,26 @@ namespace Application.EducOrgs.Queries
 
     public class GetBriefEducOrgsQueryHandler : IRequestHandler<GetBriefEducOrgsQuery, IEnumerable<BriefEducOrgDto>>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IReadDapperContext _context;
 
-        public GetBriefEducOrgsQueryHandler(IApplicationDbContext context)
+        public GetBriefEducOrgsQueryHandler(IReadDapperContext context)
         {
             _context = context;
         }
 
         public async Task<IEnumerable<BriefEducOrgDto>> Handle(GetBriefEducOrgsQuery request, CancellationToken cancellationToken)
         {
-            return await _context.EducationalOrgs
-                .AsNoTracking()
-                .Select(eo => new BriefEducOrgDto(eo.Id, eo.Name))
-                .ToListAsync(cancellationToken);
+            using var connection = _context.CreateConnection();
+
+            var query =
+            @$"select
+                  EducationalOrgs.Id as {nameof(BriefEducOrgDto.Id)},
+                  Name as {nameof(BriefEducOrgDto.Name)}
+              from EducationalOrgs";
+
+            var command = new CommandDefinition(query, cancellationToken);
+
+            return await connection.QueryAsync<BriefEducOrgDto>(command);
         }
     }
 }

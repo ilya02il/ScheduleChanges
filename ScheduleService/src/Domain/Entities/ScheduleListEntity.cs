@@ -21,13 +21,5 @@ namespace Domain.Entities
         {
             DayOfWeek = dayOfWeek;
         }
-
-        public override void AppendItem(ScheduleListItemEntity scheduleListItem)
-        {
-            if (scheduleListItem is null)
-                throw new ArgumentNullException(nameof(scheduleListItem));
-
-            ListItems.Add(scheduleListItem);
-        }
     }
 }

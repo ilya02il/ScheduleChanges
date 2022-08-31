@@ -27,9 +27,9 @@ namespace Application.ScheduleLists.Commands
 
     public class CreateScheduleListCommandHandler : IRequestHandler<CreateScheduleListCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public CreateScheduleListCommandHandler(IApplicationDbContext context)
+        public CreateScheduleListCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }

@@ -1,4 +1,4 @@
-using Infrastructure.EF;
+using Infrastructure.WriteData;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +18,7 @@ namespace ServiceAPI
 
             var services = scope.ServiceProvider;
 
-            var context = services.GetRequiredService<ApplicationDbContext>();
+            var context = services.GetRequiredService<EFWriteDbContext>();
 
             await context.Database.EnsureCreatedAsync();
 

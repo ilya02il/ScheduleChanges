@@ -19,9 +19,9 @@ namespace Application.ChangesLists.Commands.DeleteChangesList
 
     public class DeleteChangesListCommandHandler : IRequestHandler<DeleteChangesListCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public DeleteChangesListCommandHandler(IApplicationDbContext context)
+        public DeleteChangesListCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }

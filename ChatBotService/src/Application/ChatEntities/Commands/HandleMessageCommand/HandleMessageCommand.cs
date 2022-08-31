@@ -27,12 +27,12 @@ namespace Application.ChatEntities.Commands.HandleMessageCommand
     public class HanldeMessageCommandHandler 
         : IRequestHandler<HandleMessageCommand, ChatBotResponseDto>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
         private readonly IDistributedCacheWrapper _distributedCache;
         //private readonly ILogger<HanldeMessageCommandHandler> _logger;
         private readonly IGrpcScheduleClientWrapper _grpcClient;
 
-        public HanldeMessageCommandHandler(IApplicationDbContext context,
+        public HanldeMessageCommandHandler(IWriteDbContext context,
             IDistributedCacheWrapper distributedCache,
             IGrpcScheduleClientWrapper grpcClient)
         {

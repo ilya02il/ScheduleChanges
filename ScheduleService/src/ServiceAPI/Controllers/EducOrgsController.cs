@@ -22,6 +22,16 @@ namespace ServiceAPI.Controllers
             _sender = sender;
         }
 
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById([FromRoute] Guid id,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetEducOrgByIdQuery(id);
+            var senderResponse = await _sender.Send(query, cancellationToken);
+
+            return Ok(senderResponse);
+        }
+
         [HttpGet("brief")]
         [AllowAnonymous]
         public async Task<IActionResult> GetBriefEducOrgs(CancellationToken cancellationToken)
@@ -36,12 +46,16 @@ namespace ServiceAPI.Controllers
         public async Task<IActionResult> CreateEducOrg([FromBody] CreateEducOrgCommand command, 
             CancellationToken cancellationToken)
         {
-            var senderResponse = await _sender.Send(command, cancellationToken);
+            try
+            {
+                var senderResponse = await _sender.Send(command, cancellationToken);
 
-            if (!senderResponse)
-                return BadRequest();
-
-            return Ok(senderResponse);
+                return Created(string.Empty, senderResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id:guid}")]
@@ -55,7 +69,7 @@ namespace ServiceAPI.Controllers
             if (!senderResponse)
                 return BadRequest();
 
-            return Ok(senderResponse);
+            return NoContent();
         }
 
         [HttpDelete("{id:guid}")]
@@ -68,7 +82,7 @@ namespace ServiceAPI.Controllers
             if (!senderResponse)
                 return BadRequest();
 
-            return Ok(senderResponse);
+            return NoContent();
         }
     }
 }

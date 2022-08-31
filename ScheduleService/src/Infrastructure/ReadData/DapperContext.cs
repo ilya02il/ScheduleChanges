@@ -1,9 +1,10 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Application.Common.Interfaces;
+using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace Infrastructure.ReadData
 {
-    public class DapperContext
+    public class DapperContext : IReadDapperContext
     {
         private readonly string _connectionString;
 

@@ -2,13 +2,13 @@
 
 namespace Domain.Common
 {
-    public abstract class Entity
+    public abstract class EntityBase
     {
         public virtual Guid Id { get; init; } = Guid.NewGuid();
 
         public override bool Equals(object obj)
         {
-            if (obj is not Entity other)
+            if (obj is not EntityBase other)
                 return false;
 
             if (ReferenceEquals(this, other))
@@ -20,7 +20,7 @@ namespace Domain.Common
             return Id == other.Id;
         }
 
-        public static bool operator ==(Entity left, Entity right)
+        public static bool operator ==(EntityBase left, EntityBase right)
         {
             if (left is null && right is null)
                 return true;
@@ -31,7 +31,7 @@ namespace Domain.Common
             return left.Equals(right);
         }
 
-        public static bool operator !=(Entity left, Entity right)
+        public static bool operator !=(EntityBase left, EntityBase right)
         {
             return !left.Equals(right);
         }

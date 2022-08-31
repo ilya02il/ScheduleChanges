@@ -20,9 +20,9 @@ namespace Application.ChangesLists.Commands.DeleteChangesListItem
     public class DeleteChangesListItemCommandHandler 
         : IRequestHandler<DeleteChangesListItemCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public DeleteChangesListItemCommandHandler(IApplicationDbContext context)
+        public DeleteChangesListItemCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }

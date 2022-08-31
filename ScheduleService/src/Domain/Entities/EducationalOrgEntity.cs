@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Domain.Entities
 {
-    public class EducationalOrgEntity : Entity
+    public class EducationalOrgEntity : EntityBase
     {
         public string Name { get; private set; }
         public List<GroupEntity> Groups { get; private set; }

@@ -18,9 +18,9 @@ namespace Application.ChangesLists.Commands.UpdateChangesList
 
     public class UpdateChangesListCommandHandler : IRequestHandler<UpdateChangesListCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public UpdateChangesListCommandHandler(IApplicationDbContext context)
+        public UpdateChangesListCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }

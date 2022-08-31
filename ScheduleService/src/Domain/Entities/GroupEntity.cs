@@ -3,7 +3,7 @@ using System;
 
 namespace Domain.Entities
 {
-    public class GroupEntity : Entity
+    public class GroupEntity : EntityBase
     {
         public string GroupNumber { get; private set; }
         public int YearOfStudy { get; private set; }
@@ -11,7 +11,7 @@ namespace Domain.Entities
         public Guid EducationalOrgId { get; private set; }
         public EducationalOrgEntity EducationalOrg { get; private set; }
 
-        public GroupEntity() : base() { }
+        private GroupEntity() : base() { }
 
         public GroupEntity(Guid educOrgId, string groupNumber, int yearOfStudy)
         {

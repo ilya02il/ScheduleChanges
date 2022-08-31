@@ -19,9 +19,9 @@ namespace Application.Groups.Commands
 
     public class DeleteGroupCommandHandler : IRequestHandler<DeleteGroupCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public DeleteGroupCommandHandler(IApplicationDbContext context)
+        public DeleteGroupCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }

@@ -1,5 +1,5 @@
 ﻿using Application.Common.Interfaces;
-using Infrastructure.EF;
+using Infrastructure.WriteData;
 using Infrastructure.GrpcScheduleClient;
 using Infrastructure.RedisCache;
 using Microsoft.EntityFrameworkCore;
@@ -32,10 +32,10 @@ namespace Infrastructure
                 grpcScheduleSrvConnection = Environment.GetEnvironmentVariable("GRPC_SCHEDULE_SRV_CONNECTION");
             }
 
-            services.AddDbContext<ApplicationDbContext>(builder =>
+            services.AddDbContext<EFWriteDbContext>(builder =>
                 builder.UseSqlServer(
                     sqlServerConnection,
-                    b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)),
+                    b => b.MigrationsAssembly(typeof(EFWriteDbContext).Assembly.FullName)),
                 ServiceLifetime.Scoped);
 
             services.AddDistributedRedisCache(options =>
@@ -48,8 +48,8 @@ namespace Infrastructure
                 options.Address = new Uri(grpcScheduleSrvConnection);
             });
 
-            services.AddScoped<IApplicationDbContext>(provider => 
-                provider.GetService<ApplicationDbContext>()
+            services.AddScoped<IWriteDbContext>(provider => 
+                provider.GetService<EFWriteDbContext>()
                 );
 
             services.AddScoped<IDistributedCacheWrapper, RedisCacheWrapper>();

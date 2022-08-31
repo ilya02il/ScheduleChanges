@@ -25,10 +25,10 @@ namespace Application.ScheduleLists.Commands
 
     public class UpdateScheduleListCommandHandler : IRequestHandler<UpdateScheduleListCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
         private readonly IMapper _mapper;
 
-        public UpdateScheduleListCommandHandler(IApplicationDbContext context, IMapper mapper)
+        public UpdateScheduleListCommandHandler(IWriteDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -51,7 +51,7 @@ namespace Application.ScheduleLists.Commands
 
                 for (int i = 0; i < request.ListItems.Count; i++)
                 {
-                    if (request.ListItems[i].Id == Guid.Empty)
+                    if (request.ListItems[i].ItemId == Guid.Empty)
                     {
                         itemInfoBuffer = _mapper.Map<ItemInfo>(request.ListItems[i]);
 
@@ -72,7 +72,7 @@ namespace Application.ScheduleLists.Commands
                     foreach (var listItem in scheduleListItems)
                     {
                         var updatedListItem = request.ListItems
-                            .FirstOrDefault(li => li.Id == listItem.Id);
+                            .FirstOrDefault(li => li.ItemId == listItem.Id);
 
                         if (updatedListItem is not null)
                         {

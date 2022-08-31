@@ -23,10 +23,10 @@ namespace Application.ChangesLists.Commands.CreateChangesListItem
     public class UpdateChangesListItemCommandHandler 
         : IRequestHandler<CreateChangesListItemCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
         private readonly IMapper _mapper;
 
-        public UpdateChangesListItemCommandHandler(IApplicationDbContext context,
+        public UpdateChangesListItemCommandHandler(IWriteDbContext context,
             IMapper mapper)
         {
             _context = context;

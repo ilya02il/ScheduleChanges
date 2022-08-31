@@ -3,7 +3,7 @@ using System;
 
 namespace Domain.Common
 {
-    public class ListItemEntity : Entity
+    public class ListItemEntity : EntityBase
     {
         public ItemInfo ItemInfo { get; private set; }
 

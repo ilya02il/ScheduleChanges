@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Application.Common.Interfaces
 {
-    public interface IApplicationDbContext
+    public interface IWriteDbContext
     {
         public DbSet<ChatBotEntity> Chats { get; set; }
 

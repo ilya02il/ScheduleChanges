@@ -4,7 +4,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServiceAPI.Attributes;
-using ServiceAPI.Helpers;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,8 +15,6 @@ namespace ServiceAPI.Controllers
     [Route(ApiBaseRoute.BaseRoute + "/groups")]
     public class GroupsController : ControllerBase
     {
-        private const string EducOrgIdClaimType = "educ_org_id";
-
         private readonly ISender _sender;
 
         public GroupsController(ISender sender)
@@ -25,11 +22,20 @@ namespace ServiceAPI.Controllers
             _sender = sender;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetGroupsListByEducOrgId(CancellationToken cancellationToken)
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById([FromRoute] Guid id,
+            CancellationToken cancellationToken)
         {
-            Guid.TryParse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType), out Guid educOrgId);
+            var query = new GetGroupByIdQuery(id);
+            var senderResponse = await _sender.Send(query, cancellationToken);
 
+            return Ok(senderResponse);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetGroupsListByEducOrgId([FromQuery] Guid educOrgId,
+            CancellationToken cancellationToken)
+        {
             var query = new GetGroupsByEducOrgIdQuery(educOrgId);
             var senderResponse = await _sender.Send(query, cancellationToken);
 
@@ -41,12 +47,6 @@ namespace ServiceAPI.Controllers
         public async Task<IActionResult> GetBriefGroupsByEducOrgId([FromQuery] Guid educOrgId,
             CancellationToken cancellationToken)
         {
-            bool isParsed = Guid.TryParse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType),
-                out Guid eoId);
-
-            if (isParsed)
-                educOrgId = eoId;
-
             var query = new GetBriefGroupsByEducOrgIdQuery(educOrgId);
             var senderResponse = await _sender.Send(query, cancellationToken);
 
@@ -57,13 +57,15 @@ namespace ServiceAPI.Controllers
         public async Task<IActionResult> CreateGroup([FromBody] CreateGroupCommand command,
             CancellationToken cancellationToken)
         {
-            command.EducOrgId = Guid.Parse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType));
-            var senderResponse = await _sender.Send(command, cancellationToken);
-
-            if (!senderResponse)
-                return BadRequest();
-
-            return Ok(senderResponse);
+            try
+            {
+                var senderResponse = await _sender.Send(command, cancellationToken);
+                return Created(ApiBaseRoute.BaseRoute + $"/groups/{senderResponse}", senderResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id:guid}")]
@@ -77,7 +79,7 @@ namespace ServiceAPI.Controllers
             if (!senderResponse)
                 return BadRequest();
 
-            return Ok(senderResponse);
+            return NoContent();
         }
 
         [HttpDelete("{id:guid}")]
@@ -90,7 +92,7 @@ namespace ServiceAPI.Controllers
             if (!senderResponse)
                 return BadRequest();
 
-            return Ok(senderResponse);
+            return NoContent();
         }
     }
 }

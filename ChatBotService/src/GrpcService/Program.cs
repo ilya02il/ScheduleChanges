@@ -1,4 +1,4 @@
-using Infrastructure.EF;
+using Infrastructure.WriteData;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +19,7 @@ namespace GrpcAPI
 
             var services = scope.ServiceProvider;
 
-            var context = services.GetRequiredService<ApplicationDbContext>();
+            var context = services.GetRequiredService<EFWriteDbContext>();
 
             if (context.Database.IsSqlServer())
                 context.Database.Migrate();

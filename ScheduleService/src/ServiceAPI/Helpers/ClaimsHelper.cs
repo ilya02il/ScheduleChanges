@@ -11,7 +11,7 @@ namespace ServiceAPI.Helpers
             var claim = user.Claims.FirstOrDefault(c => c.Type == claimType);
 
             if (claim is null)
-                throw new Exception($"Current user claims do not contain the claim with type \'{claimType}\'.");
+                throw new NullReferenceException(claimType);
 
             return claim.Value;
         }

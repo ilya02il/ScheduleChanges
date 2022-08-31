@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Application.Common.Interfaces
 {
-    public interface IApplicationDbContext
+    public interface IWriteDbContext
     {
         DbSet<ListItemEntity> ListItems { get; }
         DbSet<ScheduleListEntity> ScheduleLists { get; }

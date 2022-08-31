@@ -1,6 +1,5 @@
 ﻿using Domain.Common;
 using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Domain.Entities
@@ -27,14 +26,6 @@ namespace Domain.Entities
         {
             IsOddWeek = isOddWeek;
             Date = date;
-        }
-
-        public override void AppendItem(ChangesListItemEntity changesListItem)
-        {
-            if (changesListItem is null)
-                throw new ArgumentNullException(nameof(changesListItem));
-
-            ListItems.Add(changesListItem);
         }
     }
 }

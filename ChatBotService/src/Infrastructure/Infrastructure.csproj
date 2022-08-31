@@ -32,12 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="EF\Migrations\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Protobuf Include="Protos\dated-schedules-messages.proto" GrpcServices="None" />
-    <Protobuf Include="Protos\dated-schedules-service.proto" GrpcServices="Client" ProtoRoot="Protos\" >
+    <Protobuf Include="Protos\dated-schedules-service.proto" GrpcServices="Client" ProtoRoot="Protos\">
       <ProtoRoot>Protos\</ProtoRoot>
     </Protobuf>
   </ItemGroup>

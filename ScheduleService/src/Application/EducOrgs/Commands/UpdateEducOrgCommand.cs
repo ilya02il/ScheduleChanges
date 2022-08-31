@@ -17,9 +17,9 @@ namespace Application.EducOrgs.Commands
 
     public class UpdateEducOrgCommandHandler : IRequestHandler<UpdateEducOrgCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public UpdateEducOrgCommandHandler(IApplicationDbContext context)
+        public UpdateEducOrgCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }

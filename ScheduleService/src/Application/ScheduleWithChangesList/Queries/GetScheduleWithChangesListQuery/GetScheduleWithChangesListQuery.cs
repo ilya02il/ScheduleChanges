@@ -1,12 +1,12 @@
 ﻿using Application.Common.Interfaces;
 using AutoMapper;
+using Dapper;
+using Domain.Common;
 using Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,10 +21,10 @@ namespace Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesList
 
     public class GetScheduleWithChangesListQueryHandler : IRequestHandler<GetScheduleWithChangesListQuery, ScheduleWithChangesDto>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IReadDapperContext _context;
         private readonly IMapper _mapper;
          
-        public GetScheduleWithChangesListQueryHandler(IApplicationDbContext context, IMapper mapper)
+        public GetScheduleWithChangesListQueryHandler(IReadDapperContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -32,58 +32,136 @@ namespace Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesList
 
         public async Task<ScheduleWithChangesDto> Handle(GetScheduleWithChangesListQuery request, CancellationToken cancellationToken)
         {
+            using var connection = _context.CreateConnection();
+
             //взять из базы изменения с нужными названием образовательной организации
             //и номером группы
 
-            var educOrgId = _context.EducationalOrgs
-                .AsNoTracking()
-                .Where(eo => eo.Name == request.EducOrgName)
-                .Select(eo => eo.Id)
-                .First();
-            var groupId = _context.Groups
-                .AsNoTracking()
-                .Where(g => g.GroupNumber == request.GroupNumber &&
-                    g.EducationalOrgId == educOrgId)
-                .Select(g => g.Id)
-                .First();
+            var query = $@"
+                select top(1)
+	                EducationalOrgs.Id
+                from EducationalOrgs
+                where
+	                Name = @{nameof(request.EducOrgName)}
+                ";
 
-            var changesList = await _context.ChangesLists
-                .AsNoTracking()
-                .FirstOrDefaultAsync(cl => cl.EducationalOrgId == educOrgId &&
-                    cl.Date.Date == request.Date.Date.Date,
-                    cancellationToken);
+            var command = new CommandDefinition(query,
+                    new { request.EducOrgName },
+                    cancellationToken: cancellationToken
+                );
 
+            var educOrgId = await connection.ExecuteScalarAsync<Guid>(command);
 
-            var changesListItems = changesList is null ? 
-                null :
-                _context.ChangesListItems
-                    .AsNoTracking()
-                    .Where(li => li.ChangesListId == changesList.Id && li.GroupId == groupId)
-                    .OrderBy(li => li.ItemInfo.Position)
-                    .ToList();
+            query = $@"
+                select
+	                ChangesLists.Id as {nameof(ChangesListEntity.Id)},
+	                Date as {nameof(ChangesListEntity.Date)},
+	                IsOddWeek as {nameof(ChangesListEntity.IsOddWeek)},
+	                EducationalOrgId as {nameof(ChangesListEntity.EducationalOrgId)}
+                from ChangesLists
+                where
+	                {nameof(ChangesListEntity.Date)} = @{nameof(request.Date)} and
+	                {nameof(ChangesListEntity.EducationalOrgId)} = @{nameof(educOrgId)}
+                ";
+
+            command = new CommandDefinition(query,
+                    new { request.Date, educOrgId },
+                    cancellationToken: cancellationToken
+                );
+
+            var changesList = await connection.QueryFirstOrDefaultAsync<ChangesListEntity>(command);
+
+            query = $@"
+                select top(1)
+	                Groups.Id
+                from Groups
+                where
+	                EducationalOrgId = @{nameof(educOrgId)} and
+	                GroupNumber = @{nameof(request.GroupNumber)}
+                ";
+
+            command = new CommandDefinition(query,
+                    new { educOrgId, request.GroupNumber },
+                    cancellationToken: cancellationToken
+                );
+
+            var groupId = await connection.ExecuteScalarAsync<Guid>(command);
+
+            query = $@"
+                select
+                    ChangesListItems.Id as ChangesListItemId,
+	                ListItems.ItemInfo_Position as {nameof(ListItemEntity.ItemInfo.Position)},
+	                ListItems.ItemInfo_SubjectName as {nameof(ListItemEntity.ItemInfo.SubjectName)},
+	                ListItems.ItemInfo_TeacherInitials as {nameof(ListItemEntity.ItemInfo.TeacherInitials)},
+	                ListItems.ItemInfo_Auditorium as {nameof(ListItemEntity.ItemInfo.Auditorium)},
+	                GroupId as {nameof(ChangesListItemEntity.GroupId)},
+	                ChangesListId as {nameof(ChangesListItemEntity.ChangesListId)}
+                from ChangesListItems
+                    left join ListItems on ChangesListItems.Id = ListItems.Id
+                where
+                    {nameof(ChangesListItemEntity.ChangesListId)} = @{nameof(changesList.Id)} and
+                    {nameof(ChangesListItemEntity.GroupId)} = @{nameof(groupId)}
+                order by
+                    {nameof(ListItemEntity.ItemInfo.Position)}
+                ";
+
+            command = new CommandDefinition(query,
+                    new { changesList.Id, groupId },
+                    cancellationToken: cancellationToken
+                );
+
+            changesList.AppendItems(await connection.QueryAsync<ChangesListItemEntity>(command));
 
             //взять из базы расписание с нужными названием образовательной организации
             //и номером группы
 
-            var isOddWeek = changesList?.IsOddWeek;
+            query = $@"
+                select
+                    SheduleLists.Id as {nameof(ScheduleListEntity.Id)},
+                    DayOfWeek as {nameof(ScheduleListEntity.DayOfWeek)},
+                    GroupId as {nameof(ScheduleListEntity.GroupId)}
+                from ScheduleLists
+                where
+                    {nameof(ScheduleListEntity.DayOfWeek)} = {nameof(request.Date.DayOfWeek)} and
+                    {nameof(ScheduleListEntity.GroupId)} = {nameof(groupId)}
+                ";
 
-            var scheduleList = await _context.ScheduleLists
-                .AsNoTracking()
-                .FirstOrDefaultAsync(sl => sl.DayOfWeek == request.Date.DayOfWeek &&
-                    sl.GroupId == groupId,
-                    cancellationToken);
+            command = new CommandDefinition(query,
+                    new { request.Date.DayOfWeek, groupId },
+                    cancellationToken: cancellationToken
+                );
 
-            var scheduleListItems = scheduleList is null ?
-                null :
-                _context.ScheduleListItems
-                    .AsNoTracking()
-                    .Where(li => li.ScheduleListId == scheduleList.Id &&
-                        (li.IsOddWeek == (isOddWeek ?? true) ||
-                        li.IsOddWeek == null))
-                    .OrderBy(li => li.ItemInfo.Position)
-                    .ToList();
+            var scheduleList = await connection.QueryFirstOrDefaultAsync<ScheduleListEntity>(command);
 
-            if (scheduleListItems is null)
+            query = $@"
+                select
+                    ScheduleListItems.Id as {nameof(ScheduleListItemEntity.Id)},
+                    IsOddWeek as {nameof(ScheduleListItemEntity.IsOddWeek)},
+                    ListItems.ItemInfo_Position as {nameof(ListItemEntity.ItemInfo.Position)},
+	                ListItems.ItemInfo_SubjectName as {nameof(ListItemEntity.ItemInfo.SubjectName)},
+	                ListItems.ItemInfo_TeacherInitials as {nameof(ListItemEntity.ItemInfo.TeacherInitials)},
+	                ListItems.ItemInfo_Auditorium as {nameof(ListItemEntity.ItemInfo.Auditorium)},
+                    ScheduleListId as {nameof(ScheduleListItemEntity.ScheduleListId)}
+                from ScheduleListItems
+                    left join ListItems on ScheduleListItems.Id = ListItems.Id
+                where
+                    {nameof(ScheduleListItemEntity.ScheduleListId)} = @{nameof(scheduleList.Id)} and
+                    (
+                        {nameof(ScheduleListItemEntity.IsOddWeek)} = @{nameof(changesList.IsOddWeek)} or
+                        {nameof(ScheduleListItemEntity.IsOddWeek)} = NULL
+                    )
+                order by
+                    {nameof(ListItemEntity.ItemInfo.Position)}
+                ";
+
+            command = new CommandDefinition(query,
+                    new { scheduleList.Id, changesList.IsOddWeek },
+                    cancellationToken: cancellationToken
+                );
+
+            scheduleList.AppendItems(await connection.QueryAsync<ScheduleListItemEntity>(command));
+
+            if (scheduleList.ListItems.Count == 0)
                 return new ScheduleWithChangesDto()
                 {
                     EducOrgName = request.EducOrgName,
@@ -92,54 +170,62 @@ namespace Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesList
                     ScheduleItems = new List<ScheduleWithChangesListItemDto>()
                 };
 
-            var resultItemsList = new List<ScheduleWithChangesListItemDto>();
+            query = $@"
+                select
+                    LessonCalls.Id as {nameof(LessonCallEntity.Id)},
+                    Position as {nameof(LessonCallEntity.Position)},
+                    StartTime as {nameof(LessonCallEntity.StartTime)},
+                    EndTime as {nameof(LessonCallEntity.EndTime)}
+                from LessonCalls
+                    left join DatedLessonCalls on LessonCalls.Id = DatedLessonCalls.Id
+                where
+                    {nameof(LessonCallEntity.EducationalOrgId)} = @{nameof(educOrgId)} and
+                    (
+                        {nameof(LessonCallEntity.DayOfWeek)} = @{nameof(request.Date.DayOfWeek)} or
+                        {nameof(DatedLessonCallEntity.Date)} = @{nameof(request.Date)}
+                    )
+                ";
 
-            IQueryable<LessonCallEntity> lessonCalls = _context.DatedLessonCalls
-                .AsNoTracking()
-                .Where(dlc => dlc.EducationalOrgId == educOrgId &&
-                    dlc.Date == request.Date);
+            command = new CommandDefinition(query,
+                    new { educOrgId, request.Date, request.Date.DayOfWeek },
+                    cancellationToken: cancellationToken
+                );
 
-            if (!lessonCalls.Any())
-            {
-                lessonCalls = _context.LessonCalls
-                    .AsNoTracking()
-                    .Where(lc => lc.EducationalOrgId == educOrgId &&
-                        lc.DayOfWeek == request.Date.DayOfWeek);
-            }
-
-            var lessonCallsList = lessonCalls.ToList();
+            var lessonCalls = await connection.QueryAsync<LessonCallEntity>(command);
 
             ScheduleWithChangesListItemDto buffer;
             LessonCallEntity lessonCallsBuffer;
 
-            for (int i = 0; i < scheduleListItems.Count; i++)
+            var resultItemsList = new List<ScheduleWithChangesListItemDto>();
+
+            for (int i = 0; i < scheduleList.ListItems.Count; i++)
             {
                 buffer = null;
 
                 if (changesList is not null)
                 {
-                    for (int j = 0; j < changesListItems.Count; j++)
+                    for (int j = 0; j < changesList.ListItems.Count; j++)
                     {
-                        if (!(changesListItems[j].ItemInfo.Position <= scheduleListItems[i].ItemInfo.Position))
+                        if (!(changesList.ListItems[j].ItemInfo.Position <= scheduleList.ListItems[i].ItemInfo.Position))
                             break;
 
-                        if (changesListItems[j].ItemInfo.Position < scheduleListItems[i].ItemInfo.Position)
+                        if (changesList.ListItems[j].ItemInfo.Position < scheduleList.ListItems[i].ItemInfo.Position)
                             i--;
 
-                        buffer = _mapper.Map<ScheduleWithChangesListItemDto>(changesListItems[j]);
-                        lessonCallsBuffer = lessonCallsList.Single(lc => lc.Position == changesListItems[j].ItemInfo.Position);
+                        buffer = _mapper.Map<ScheduleWithChangesListItemDto>(changesList.ListItems[j]);
+                        lessonCallsBuffer = lessonCalls.Single(lc => lc.Position == changesList.ListItems[j].ItemInfo.Position);
 
                         buffer.StartTime = lessonCallsBuffer.StartTime;
                         buffer.EndTime = lessonCallsBuffer.EndTime;
 
-                        changesListItems.Remove(changesListItems[j]);
+                        changesList.ListItems.Remove(changesList.ListItems[j]);
                     }
                 }
 
                 if (buffer is null)
                 {
-                    buffer = _mapper.Map<ScheduleWithChangesListItemDto>(scheduleListItems[i]);
-                    lessonCallsBuffer = lessonCallsList.Single(lc => lc.Position == scheduleListItems[i].ItemInfo.Position);
+                    buffer = _mapper.Map<ScheduleWithChangesListItemDto>(scheduleList.ListItems[i]);
+                    lessonCallsBuffer = lessonCalls.Single(lc => lc.Position == scheduleList.ListItems[i].ItemInfo.Position);
 
                     buffer.StartTime = lessonCallsBuffer.StartTime;
                     buffer.EndTime = lessonCallsBuffer.EndTime;

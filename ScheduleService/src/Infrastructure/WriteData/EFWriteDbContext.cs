@@ -27,10 +27,14 @@ namespace Infrastructure.WriteData
 
             modelBuilder.Entity<DatedLessonCallEntity>().ToTable("DatedLessonCalls");
 
+            modelBuilder.Entity<EducationalOrgEntity>()
+                .HasIndex(eo => eo.Name)
+                .IsUnique();
+
             //modelBuilder.Entity<ChangesListEntity>()
-                //.HasOne(e => e.EducationalOrg)
-                //.WithMany();
-                //.OnDelete(DeleteBehavior.NoAction);
+            //.HasOne(e => e.EducationalOrg)
+            //.WithMany();
+            //.OnDelete(DeleteBehavior.NoAction);
 
             //modelBuilder.Entity<LessonCallEntity>()
             //    .HasOne(lc => lc.Date)

@@ -4,9 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServiceAPI.Attributes;
-using ServiceAPI.Helpers;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,8 +15,6 @@ namespace ServiceAPI.Controllers
     [Route(ApiBaseRoute.BaseRoute + "/call-schedule-lists")]
     public class CallScheduleListsController : ControllerBase
     {
-        private const string EducOrgIdClaimType = "educ_org_id";
-
         private readonly ISender _sender;
 
         public CallScheduleListsController(ISender sender)
@@ -32,30 +28,28 @@ namespace ServiceAPI.Controllers
             [FromQuery] DayOfWeek dayOfWeek,
             CancellationToken cancellationToken)
         {
-            bool isParsed = Guid.TryParse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType),
-                out Guid eoId);
-
-            if (isParsed)
-                educOrgId = eoId;
-
             var senderRequest = new GetCallScheduleListQuery(educOrgId, dayOfWeek);
-
             var senderResponse = await _sender.Send(senderRequest, cancellationToken);
 
             return Ok(senderResponse);
         }
 
         [HttpPost("items")]
-        public async Task<IActionResult> CreateCallScheduleListItem(CreateCallScheduleListItemCommand command,
+        public async Task<IActionResult> CreateCallScheduleListItem([FromQuery] Guid educOrgId,
+            [FromBody] CreateCallScheduleListItemCommand command,
             CancellationToken cancellationToken)
         {
-            command.EducOrgId = Guid.Parse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType));
-            var senderResponse = await _sender.Send(command, cancellationToken);
+            try
+            {
+                command.EducOrgId = educOrgId;
+                var senderResponse = await _sender.Send(command, cancellationToken);
 
-            if (!senderResponse)
-                return BadRequest();
-
-            return Ok(senderResponse);
+                return Created(string.Empty, senderResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("items/{id:guid}")]
@@ -63,26 +57,40 @@ namespace ServiceAPI.Controllers
             UpdateCallScheduleListItemCommand command,
             CancellationToken cancellationToken)
         {
-            command.Id = id;
-            var senderResponse = await _sender.Send(command, cancellationToken);
+            try
+            {
+                command.Id = id;
+                var senderResponse = await _sender.Send(command, cancellationToken);
 
-            if (!senderResponse)
-                return BadRequest();
+                if (!senderResponse)
+                    return BadRequest();
 
-            return Ok(senderResponse);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("items/{id:guid}")]
         public async Task<IActionResult> DeleteCallScheduleListItem([FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
-            var command = new DeleteCallScheduleListItemCommand(id);
-            var senderResponse = await _sender.Send(command, cancellationToken);
+            try
+            {
+                var command = new DeleteCallScheduleListItemCommand(id);
+                var senderResponse = await _sender.Send(command, cancellationToken);
 
-            if (!senderResponse)
-                return BadRequest(senderResponse);
+                if (!senderResponse)
+                    return BadRequest(senderResponse);
 
-            return Ok(senderResponse);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

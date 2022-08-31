@@ -19,9 +19,9 @@ namespace Application.ScheduleLists.Commands
 
     public class DeleteScheduleListCommandHandler : IRequestHandler<DeleteScheduleListCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public DeleteScheduleListCommandHandler(IApplicationDbContext context)
+        public DeleteScheduleListCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }

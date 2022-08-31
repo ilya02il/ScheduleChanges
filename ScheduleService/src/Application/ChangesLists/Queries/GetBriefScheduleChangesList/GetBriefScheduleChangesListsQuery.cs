@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces;
+using Dapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,20 +22,34 @@ namespace Application.ChangesLists.Queries.GetBriefScheduleChangesList
 
     public class GetBriefScheduleChangesListQueryHandler : IRequestHandler<GetBriefScheduleChangesListsQuery, IEnumerable<BriefChangesListDto>>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IReadDapperContext _context;
 
-        public GetBriefScheduleChangesListQueryHandler(IApplicationDbContext context)
+        public GetBriefScheduleChangesListQueryHandler(IReadDapperContext context)
         {
             _context = context;
         }
 
         public async Task<IEnumerable<BriefChangesListDto>> Handle(GetBriefScheduleChangesListsQuery request, CancellationToken cancellationToken)
         {
-            return await _context.ChangesLists
-                .AsNoTracking()
-                .OrderBy(cl => cl.Date)
-                .Select(cl => new BriefChangesListDto(cl.Id, cl.Date))
-                .ToListAsync(cancellationToken);
+            var connection = _context.CreateConnection();
+
+            var query = $@"
+                select
+                    ChangesLists.Id as {nameof(BriefChangesListDto.Id)},
+                    Date as {nameof(BriefChangesListDto.Date)}
+                from ChangesLists
+                where
+                    EducationalOrgId = @{nameof(request.EducOrgId)}
+                order by
+                    {nameof(BriefChangesListDto.Date)}
+                ";
+
+            var command = new CommandDefinition(query,
+                    new { request.EducOrgId },
+                    cancellationToken: cancellationToken
+                );
+
+            return await connection.QueryAsync<BriefChangesListDto>(command);
         }
     }
 }

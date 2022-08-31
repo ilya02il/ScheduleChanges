@@ -7,6 +7,6 @@ namespace Application.ScheduleLists.Dtos
     {
         public Guid Id { get; init; }
         public DayOfWeek DayOfWeek { get; init; }
-        public IEnumerable<ScheduleListItemDto> ListItems { get; init; }
+        public IList<ScheduleListItemDto> ListItems { get; init; } = new List<ScheduleListItemDto>();
     }
 }

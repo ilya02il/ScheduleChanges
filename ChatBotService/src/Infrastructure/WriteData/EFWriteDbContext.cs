@@ -2,13 +2,13 @@
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.EF
+namespace Infrastructure.WriteData
 {
-    public class ApplicationDbContext : DbContext, IApplicationDbContext
+    public class EFWriteDbContext : DbContext, IWriteDbContext
     {
         public DbSet<ChatBotEntity> Chats { get; set; }
 
-        public ApplicationDbContext(DbContextOptions options) : base(options) { }
+        public EFWriteDbContext(DbContextOptions options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

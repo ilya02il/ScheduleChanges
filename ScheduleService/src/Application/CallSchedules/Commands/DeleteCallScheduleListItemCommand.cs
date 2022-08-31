@@ -19,9 +19,9 @@ namespace Application.CallSchedules.Commands
 
     public class DeleteCallScheduleListItemCommandHandler : IRequestHandler<DeleteCallScheduleListItemCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public DeleteCallScheduleListItemCommandHandler(IApplicationDbContext context)
+        public DeleteCallScheduleListItemCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }
@@ -30,6 +30,9 @@ namespace Application.CallSchedules.Commands
         {
             var entity = _context.LessonCalls
                 .FirstOrDefault(lc => lc.Id == request.Id);
+
+            if (entity is null)
+                throw new Exception("There is no item with such as id.");
 
             _context.LessonCalls.Remove(entity);
             var result = await _context.SaveChangesAsync(cancellationToken);

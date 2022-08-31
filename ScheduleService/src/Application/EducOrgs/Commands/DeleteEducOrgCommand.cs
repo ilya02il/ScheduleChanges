@@ -2,9 +2,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,9 +19,9 @@ namespace Application.EducOrgs.Commands
 
     public class DeleteEducOrgCommandHandler : IRequestHandler<DeleteEducOrgCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public DeleteEducOrgCommandHandler(IApplicationDbContext context)
+        public DeleteEducOrgCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }
@@ -32,11 +29,13 @@ namespace Application.EducOrgs.Commands
         public async Task<bool> Handle(DeleteEducOrgCommand request, CancellationToken cancellationToken)
         {
             var entity = await _context.EducationalOrgs
+                .Include(eo => eo.ChangesLists)
                 .FirstOrDefaultAsync(eo => eo.Id == request.Id, cancellationToken);
 
             if (entity is null)
                 return false;
 
+            _context.ChangesLists.RemoveRange(entity.ChangesLists);
             _context.EducationalOrgs.Remove(entity);
             var result = await _context.SaveChangesAsync(cancellationToken);
 

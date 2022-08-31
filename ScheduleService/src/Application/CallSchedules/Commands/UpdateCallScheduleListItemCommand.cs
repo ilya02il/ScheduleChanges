@@ -13,15 +13,15 @@ namespace Application.CallSchedules.Commands
         [JsonIgnore]
         public Guid Id { get; set; }
         public int Position { get; init; }
-        public string StartTime { get; init; }
-        public string EndTime { get; init; }
+        public long StartTime { get; init; }
+        public long EndTime { get; init; }
     }
 
     public class UpdateCallScheduleListItemCommandHandler : IRequestHandler<UpdateCallScheduleListItemCommand, bool>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IWriteDbContext _context;
 
-        public UpdateCallScheduleListItemCommandHandler(IApplicationDbContext context)
+        public UpdateCallScheduleListItemCommandHandler(IWriteDbContext context)
         {
             _context = context;
         }
@@ -31,14 +31,20 @@ namespace Application.CallSchedules.Commands
             var entity = _context.LessonCalls
                 .FirstOrDefault(lc => lc.Id == request.Id);
 
+            if (entity is null)
+                throw new Exception("There is no item with such an id.");
+
             entity.UpdateLessonCallInfo(request.Position,
                 entity.DayOfWeek,
-                TimeSpan.Parse(request.StartTime),
-                TimeSpan.Parse(request.EndTime));
+                request.StartTime,
+                request.EndTime);
 
             var result = await _context.SaveChangesAsync(cancellationToken);
 
-            return result > 0;
+            if (result <= 0)
+                return false;
+
+            return true;
         }
     }
 }
