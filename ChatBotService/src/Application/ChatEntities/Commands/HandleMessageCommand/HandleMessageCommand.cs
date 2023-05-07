@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-
+﻿using Application.Common.Helpers;
 using Application.Common.Interfaces;
 using Domain.Dtos;
 using Domain.Entities;
@@ -11,6 +6,12 @@ using Domain.Events;
 using Domain.ValueObjects;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Application.ChatEntities.Commands.HandleMessageCommand
 {

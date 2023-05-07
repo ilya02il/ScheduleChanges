@@ -1,0 +1,19 @@
+﻿syntax = "proto3";
+
+import "schedule-lists-messages.proto";
+
+package scheduleList.service;
+option csharp_namespace = "ScheduleLists.Service";
+
+service GrpcScheduleLists {
+	rpc GetScheduleListsByGroupId(scheduleLists.messages.GetScheduleListsByGroupIdRequest)
+		returns (scheduleLists.messages.GetScheduleListsByGroupIdResponse);
+	rpc GetScheduleListById(scheduleLists.messages.GetScheduleListByIdRequest)
+		returns (scheduleLists.messages.ScheduleList);
+	rpc CreateScheduleList(scheduleLists.messages.CreateScheduleListRequest)
+		returns (scheduleLists.messages.SucceedResponse);
+	rpc UpdateScheduleList(scheduleLists.messages.ScheduleList)
+		returns (scheduleLists.messages.SucceedResponse);
+	rpc DeleteScheduleList(scheduleLists.messages.DeleteScheduleListRequest)
+		returns (scheduleLists.messages.SucceedResponse);
+}
