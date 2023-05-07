@@ -1,5 +1,4 @@
-﻿using Domain.Common;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Domain.Events
 {

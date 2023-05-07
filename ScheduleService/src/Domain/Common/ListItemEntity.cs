@@ -1,9 +1,11 @@
-﻿using Domain.ValueObjects;
-using System;
+﻿using System;
+
+using Domain.ValueObjects;
+using ScheduleChanges.Core.Domain.BaseClasses;
 
 namespace Domain.Common
 {
-    public class ListItemEntity : EntityBase
+    public class ListItemEntity : BaseEntity
     {
         public ItemInfo ItemInfo { get; private set; }
 

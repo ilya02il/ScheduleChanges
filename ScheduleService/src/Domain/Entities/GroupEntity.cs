@@ -1,9 +1,9 @@
-﻿using Domain.Common;
-using System;
+﻿using System;
+using ScheduleChanges.Core.Domain.BaseClasses;
 
 namespace Domain.Entities
 {
-    public class GroupEntity : EntityBase
+    public class GroupEntity : BaseEntity
     {
         public string GroupNumber { get; private set; }
         public int YearOfStudy { get; private set; }

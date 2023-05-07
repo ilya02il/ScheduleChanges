@@ -1,9 +1,9 @@
-﻿using Domain.Common;
-using System;
+﻿using System;
+using ScheduleChanges.Core.Domain.BaseClasses;
 
 namespace Domain.Entities
 {
-    public class LessonCallEntity : EntityBase
+    public class LessonCallEntity : BaseEntity
     {
         public int Position { get; private set; }
         public DayOfWeek DayOfWeek { get; private set; }

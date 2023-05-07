@@ -1,19 +1,11 @@
-﻿using Domain.Common;
-using System.Collections.Generic;
+﻿using ScheduleChanges.Core.Domain.BaseClasses;
 
 namespace Domain.ValueObjects
 {
-    public class EducationalInfo : ValueObject
+    public class EducationalInfo : BaseValueObject<EducationalInfo>
     {
         public string EducOrgName { get; set; }
         public int YearOfStudy { get; set; }
         public string GroupNumber { get; set; }
-
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            yield return EducOrgName;
-            yield return YearOfStudy;
-            yield return GroupNumber;
-        }
     }
 }
