@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using ScheduleChanges.Core.Domain.BaseClasses;
+
 namespace Domain.Common
 {
-    public abstract class ListEntity<TItem> : EntityBase
+    public abstract class ListEntity<TItem> : BaseEntity
         where TItem : ListItemEntity
     {
         public List<TItem> ListItems { get; private set; } = new List<TItem>();
@@ -15,6 +17,7 @@ namespace Domain.Common
 
             ListItems.Add(listItem);
         }
+
         public virtual void AppendItems(IEnumerable<TItem> listItems)
         {
             if (listItems is null)

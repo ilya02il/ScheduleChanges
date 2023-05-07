@@ -1,16 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ChatEntities\Queries\**" />
+    <EmbeddedResource Remove="ChatEntities\Queries\**" />
+    <None Remove="ChatEntities\Queries\**" />
+  </ItemGroup>
 	
   <ItemGroup>
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.13" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ChatEntities\Queries\" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.16" />
+    <PackageReference Include="ScheduleChanges.Core.Application" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

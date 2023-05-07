@@ -1,9 +1,10 @@
-﻿using Domain.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
+using ScheduleChanges.Core.Domain.BaseClasses;
 
 namespace Domain.Entities
 {
-    public class EducationalOrgEntity : EntityBase
+    public class EducationalOrgEntity : BaseEntity
     {
         public string Name { get; private set; }
         public List<GroupEntity> Groups { get; private set; }
