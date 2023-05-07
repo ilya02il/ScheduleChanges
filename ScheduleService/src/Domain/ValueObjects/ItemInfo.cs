@@ -1,11 +1,9 @@
-﻿using Domain.Common;
-using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+﻿using System;
+using ScheduleChanges.Core.Domain.BaseClasses;
 
 namespace Domain.ValueObjects
 {
-    public class ItemInfo : ValueObject
+    public class ItemInfo : BaseValueObject<ItemInfo>
     {
         private int _position;
         private string _subjectName;
@@ -33,14 +31,6 @@ namespace Domain.ValueObjects
         {
             get => _auditorium;
             set => _auditorium = value ?? throw new ArgumentNullException(nameof(value));
-        }
-
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            yield return Position;
-            yield return SubjectName;
-            yield return TeacherInitials;
-            yield return Auditorium;
         }
     }
 }
