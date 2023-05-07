@@ -1,0 +1,77 @@
+﻿syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package changesLists.messages;
+option csharp_namespace = "ChangesLists.Messages";
+
+message ChangesListItem {
+    string id = 1;
+    string groupId = 2;
+    string changesListId = 3;
+    int32 position = 4;
+    string subjectName = 5;
+    string teacherInitials = 6;
+    string auditorium = 7;
+}
+
+message BriefChangesList {
+    string id = 1;
+    google.protobuf.Timestamp date = 2;
+}
+
+message SucceedResponse {
+    bool isSucceed = 1;
+}
+
+message GetBriefChangesListCollectionResponse {
+    repeated BriefChangesList lists = 1;
+}
+
+message GetByEducOrgIdRequest {
+    string educOrgId = 1;
+}
+
+message GetByIdRequest {
+    string id = 1;
+}
+
+message GetChangesListByIdResponse {
+    string listId = 1;
+    string educOrgId = 2;
+    google.protobuf.Timestamp date = 3;
+    repeated ChangesListItem listItems = 4;
+}
+
+message CreateScheduleChangesListRequest {
+    string educOrgId = 1;
+    google.protobuf.Timestamp date = 2;
+    bool isOddWeek = 3;
+}
+
+message CreateScheduleChangesListFromFileRequest {
+    oneof data {
+        ScheduleSchangesListMetadata metadata = 1;
+        bytes fileData = 2;
+    }
+}
+
+message ScheduleSchangesListMetadata {
+    string educOrgId = 1;
+    google.protobuf.Timestamp date = 2;
+    bool isOddWeek = 3;
+}
+
+message UpdateScheduleChangesListRequest {
+    string id = 1;
+    google.protobuf.Timestamp date = 2;
+    bool isOddWeek = 3;
+}
+
+message DeleteScheduleChangesListRequest {
+    string listId = 1;
+}
+
+message DeleteScheduleChangesItemRequest {
+    string id = 1;
+}

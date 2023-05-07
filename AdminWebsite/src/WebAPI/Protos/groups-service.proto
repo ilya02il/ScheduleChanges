@@ -1,0 +1,23 @@
+﻿syntax = "proto3";
+
+import "groups-messages.proto";
+
+package groups.service;
+option csharp_namespace = "Groups.Service";
+
+service GrpcGroupsLists {
+    rpc GetGroupsListByEducOrgId(groups.messages.GetByEducOrgIdRequest) 
+        returns (groups.messages.GetGroupsListByEducOrgIdResponse);
+
+    rpc GetBriefGroupsByEducOrgId(groups.messages.GetByEducOrgIdRequest) 
+        returns (groups.messages.GetBriefGroupsByEducOrgIdRespose);
+
+    rpc CreateGroup(groups.messages.CreateGroupRequest) 
+        returns (groups.messages.SucceedResponse);
+
+    rpc UpdateGroup(groups.messages.UpdateGroupInfoRequest) 
+        returns (groups.messages.SucceedResponse);
+
+    rpc DeleteGroup(groups.messages.DeleteGroupRequest) 
+        returns (groups.messages.SucceedResponse);
+}

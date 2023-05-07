@@ -1,0 +1,49 @@
+﻿syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package groups.messages;
+option csharp_namespace = "Groups.Messages";
+
+message Group {
+	string id = 1;
+	string groupNumber = 2;
+	int32 yearOfStudy = 3;
+}
+
+message GroupBrief {
+	string id = 1;
+	string groupNumber = 2;
+}
+
+message GetByEducOrgIdRequest {
+	string educOrgId = 1;
+}
+
+message GetGroupsListByEducOrgIdResponse {
+	repeated Group groups = 1;
+}
+
+message GetBriefGroupsByEducOrgIdRespose {
+	repeated GroupBrief briefGroups = 1;
+}
+
+message CreateGroupRequest {
+	string educOrgId = 1;
+	string groupNumber = 2;
+	int32 yearOfStudy = 3;
+}
+
+message UpdateGroupInfoRequest {
+	string id = 1;
+	string groupNumber = 2;
+	int32 yearOfStudy = 3;
+}
+
+message DeleteGroupRequest {
+	string id = 1;
+}
+
+message SucceedResponse {
+	bool isSucceed = 1;
+}

@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Domain.Common;
+using Domain.Dtos;
+using Domain.Events;
+using Domain.ValueObjects;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -6,16 +10,11 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Domain.Dtos;
-using Domain.Events;
-using Domain.ValueObjects;
-using ScheduleChanges.Core.Domain.BaseClasses;
-
 namespace Domain.Entities
 {
     internal delegate Task<ChatBotResponseDto> StateActionDelegate(string message = "");
 
-    public class ChatBotEntity : BaseEntity
+    public class ChatBotEntity : Entity
     {
         public event GetDatedScheduleEventHandler GetDatedSchedule;
         public event GetEducOrgsListEventHandler GetEducOrgsList;
