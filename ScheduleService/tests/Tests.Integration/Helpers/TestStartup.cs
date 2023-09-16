@@ -18,24 +18,20 @@ namespace Tests.Integration.Helpers
     public class TestStartup : Startup
     {
         private readonly IConfiguration _configuration;
-        private readonly IWebHostEnvironment _env;
 
         public TestStartup(IConfiguration configuration, IWebHostEnvironment env) : base(configuration, env)
         {
             _configuration = configuration;
-            _env = env;
         }
 
         public override void ConfigureServices(IServiceCollection services)
         {
-            var test = _configuration["TestDbConnectionString"];
-
             services.AddAutoMapper(typeof(MappingProfile).Assembly);
             services.AddApplication();
             services.AddInfrastructure(_configuration["TestDbConnectionString"]);
 
             services
-                .AddScoped(fact =>
+                .AddScoped(_ =>
                 {
                     var callMock = GrpcCallHelpers
                         .CreateAsyncUnaryCall(new ValidateJwtTokenResponse { IsValid = true });
@@ -60,7 +56,7 @@ namespace Tests.Integration.Helpers
             var provider = services.BuildServiceProvider();
             using var scope = provider.CreateScope();
 
-            var writeContext = scope.ServiceProvider.GetRequiredService<EFWriteDbContext>();
+            var writeContext = scope.ServiceProvider.GetRequiredService<EfWriteDbContext>();
             writeContext.Database.EnsureCreated();
 
             DatabaseSeeds.Seed(writeContext);
@@ -72,7 +68,7 @@ namespace Tests.Integration.Helpers
             app.UseRouting();
 
             app.UseCors(x => x
-                .SetIsOriginAllowed(origin => true)// allow any origin
+                .SetIsOriginAllowed(_ => true)// allow any origin
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials());

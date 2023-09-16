@@ -12,99 +12,98 @@ using ServiceAPI.GrpcServices;
 using System;
 using System.Reflection;
 
-namespace ServiceAPI
+namespace ServiceAPI;
+
+public class Startup
 {
-    public class Startup
+    public IConfiguration Configuration { get; }
+    public IWebHostEnvironment Env { get; }
+
+    public Startup(IConfiguration configuration, IWebHostEnvironment env)
     {
-        public IConfiguration Configuration { get; }
-        public IWebHostEnvironment Env { get; }
+        Configuration = configuration;
+        Env = env;
+    }
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+    // This method gets called by the runtime. Use this method to add services to the container.
+    // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+    public virtual void ConfigureServices(IServiceCollection services)
+    {
+        string sqlServerConnection, grpcJwtValidationConnection;
+
+        if (Env.IsDevelopment())
         {
-            Configuration = configuration;
-            Env = env;
+            sqlServerConnection = Configuration.GetConnectionString("DefaultConnection");
+            grpcJwtValidationConnection = Configuration.GetConnectionString("GrpcJwtValidationServiceConnection");
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public virtual void ConfigureServices(IServiceCollection services)
+        else
         {
-            string sqlServerConnection, grpcJwtValidationConnection;
-
-            if (Env.IsDevelopment())
-            {
-                sqlServerConnection = Configuration.GetConnectionString("DefaultConnection");
-                grpcJwtValidationConnection = Configuration.GetConnectionString("GrpcJwtValidationServiceConnection");
-            }
-
-            else
-            {
-                sqlServerConnection = Environment.GetEnvironmentVariable("SQL_SERVER_CONNECTION") ?? string.Empty;
-                grpcJwtValidationConnection = Environment.GetEnvironmentVariable("GRPC_JWT_VALIDATION_CONNECTION") ?? string.Empty;
-            }
-
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
-            services.AddApplication();
-            services.AddInfrastructure(sqlServerConnection);
-
-            services.AddGrpc();
-
-            services.AddGrpcClient<GrpcJwtValidationService.GrpcJwtValidationServiceClient>(options =>
-            {
-                options.Address = new Uri(grpcJwtValidationConnection);
-            });
-            services.AddScoped<JwtValidationServiceGrpcClient>();
-
-            //services.AddHttpsRedirection(options =>
-            //{
-            //    options.RedirectStatusCode = (int)HttpStatusCode.PermanentRedirect;
-            //    options.HttpsPort = 80;
-            //});
-
-            services.AddControllers();
-
-            services.AddSwagger();
-            services.AddServiceAuthentiction();
-
-            services.AddCors();
+            sqlServerConnection = Environment.GetEnvironmentVariable("SQL_SERVER_CONNECTION") ?? string.Empty;
+            grpcJwtValidationConnection = Environment.GetEnvironmentVariable("GRPC_JWT_VALIDATION_CONNECTION") ?? string.Empty;
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddApplication();
+        services.AddInfrastructure(sqlServerConnection);
+
+        services.AddGrpc();
+
+        services.AddGrpcClient<GrpcJwtValidationService.GrpcJwtValidationServiceClient>(options =>
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            options.Address = new Uri(grpcJwtValidationConnection);
+        });
+        services.AddScoped<JwtValidationServiceGrpcClient>();
 
-            //app.UseHttpsRedirection();
+        //services.AddHttpsRedirection(options =>
+        //{
+        //    options.RedirectStatusCode = (int)HttpStatusCode.PermanentRedirect;
+        //    options.HttpsPort = 80;
+        //});
 
-            app.UseSwagger(options =>
-            {
-                options.RouteTemplate = ApiBaseRoute.BaseRoute + "/docs/swagger/{documentName}/swagger.json";
-            });
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint($"/{ApiBaseRoute.BaseRoute}/docs/swagger/v1/swagger.json", "Admin Website API v1");
-                options.RoutePrefix = ApiBaseRoute.BaseRoute + "/docs/swagger";
-            });
+        services.AddControllers();
 
-            app.UseRouting();
+        services.AddSwagger();
+        services.AddServiceAuthentiction();
 
-            app.UseCors(x => x
-                .SetIsOriginAllowed(origin => true)// allow any origin
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials());
+        services.AddCors();
+    }
 
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGrpcService<DatedSchedulesService>();
-                endpoints.MapControllers();
-            });
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
         }
+
+        //app.UseHttpsRedirection();
+
+        app.UseSwagger(options =>
+        {
+            options.RouteTemplate = ApiBaseRoute.BaseRoute + "/docs/swagger/{documentName}/swagger.json";
+        });
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint($"/{ApiBaseRoute.BaseRoute}/docs/swagger/v1/swagger.json", "Admin Website API v1");
+            options.RoutePrefix = ApiBaseRoute.BaseRoute + "/docs/swagger";
+        });
+
+        app.UseRouting();
+
+        app.UseCors(x => x
+            .SetIsOriginAllowed(origin => true)// allow any origin
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapGrpcService<DatedSchedulesService>();
+            endpoints.MapControllers();
+        });
     }
 }

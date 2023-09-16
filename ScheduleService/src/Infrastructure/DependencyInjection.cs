@@ -12,13 +12,13 @@ namespace Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, string sqlServerConnection)
         {
-            services.AddDbContext<EFWriteDbContext>(builder =>
+            services.AddDbContext<EfWriteDbContext>(builder =>
                 builder.UseSqlServer(
                     sqlServerConnection,
-                    b => b.MigrationsAssembly(typeof(EFWriteDbContext).Assembly.FullName)),
+                    b => b.MigrationsAssembly(typeof(EfWriteDbContext).Assembly.FullName)),
                 ServiceLifetime.Scoped);
 
-            services.AddScoped<IWriteDbContext>(provider => provider.GetService<EFWriteDbContext>());
+            services.AddScoped<IWriteDbContext>(provider => provider.GetService<EfWriteDbContext>());
             services.AddScoped<IReadDapperContext>(fact => new DapperContext(sqlServerConnection));
             services.AddTransient<ITableFileParser<ItemInfo>, WordTableFileParser<ItemInfo>>();
 

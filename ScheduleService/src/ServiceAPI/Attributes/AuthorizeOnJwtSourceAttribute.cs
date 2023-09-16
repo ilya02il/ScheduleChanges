@@ -5,35 +5,34 @@ using Microsoft.Extensions.DependencyInjection;
 using ServiceAPI.GrpcClients;
 using System.Threading.Tasks;
 
-namespace ServiceAPI.Attributes
+namespace ServiceAPI.Attributes;
+
+public class AuthorizeOnJwtSourceAttribute 
+    : AuthorizeAttribute, IAsyncAuthorizationFilter
 {
-    public class AuthorizeOnJwtSourceAttribute 
-        : AuthorizeAttribute, IAsyncAuthorizationFilter
+    public AuthorizeOnJwtSourceAttribute(string? roles = default)
     {
-        public AuthorizeOnJwtSourceAttribute(string? Roles = default)
+        this.Roles = roles;
+    }
+
+    public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+    {
+        if (context.HttpContext.User.Identity?.IsAuthenticated ?? false)
         {
-            this.Roles = Roles;
-        }
+            var authorizationService = context.HttpContext
+                .RequestServices
+                .GetRequiredService<JwtValidationServiceGrpcClient>();
 
-        public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
-        {
-            if (context.HttpContext.User.Identity?.IsAuthenticated ?? false)
-            {
-                var authorizationService = context.HttpContext
-                    .RequestServices
-                    .GetRequiredService<JwtValidationServiceGrpcClient>();
+            string token = context.HttpContext
+                .Request
+                .Headers["Authorization"]
+                .ToString()[7..];
 
-                string token = context.HttpContext
-                    .Request
-                    .Headers["Authorization"]
-                    .ToString()[7..];
+            bool isTokenValid = await authorizationService.ValidateJwtTokenAsync(token,
+                context.HttpContext.RequestAborted);
 
-                bool isTokenValid = await authorizationService.ValidateJwtTokenAsync(token,
-                    context.HttpContext.RequestAborted);
-
-                if (!isTokenValid)
-                    context.Result = new UnauthorizedResult();
-            }
+            if (!isTokenValid)
+                context.Result = new UnauthorizedResult();
         }
     }
 }

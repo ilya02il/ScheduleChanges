@@ -8,7 +8,7 @@ using System;
 
 namespace Infrastructure.Migrations
 {
-    [DbContext(typeof(EFWriteDbContext))]
+    [DbContext(typeof(EfWriteDbContext))]
     [Migration("20220507132631_YearOfStudyFieldToGroupsTable")]
     partial class YearOfStudyFieldToGroupsTable
     {

@@ -8,89 +8,88 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ServiceAPI.Controllers
+namespace ServiceAPI.Controllers;
+
+[ApiController]
+[AuthorizeOnJwtSource(Roles = "Admin, EducOrgManager")]
+[Route(ApiBaseRoute.BaseRoute + "/call-schedule-lists")]
+public class CallScheduleListsController : ControllerBase
 {
-    [ApiController]
-    [AuthorizeOnJwtSource(Roles = "Admin, EducOrgManager")]
-    [Route(ApiBaseRoute.BaseRoute + "/call-schedule-lists")]
-    public class CallScheduleListsController : ControllerBase
+    private readonly ISender _sender;
+
+    public CallScheduleListsController(ISender sender)
     {
-        private readonly ISender _sender;
+        _sender = sender;
+    }
 
-        public CallScheduleListsController(ISender sender)
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetCallScheduleListByEducOrgIdAndDayOfWeek([FromQuery] Guid educOrgId,
+        [FromQuery] DayOfWeek dayOfWeek,
+        CancellationToken cancellationToken)
+    {
+        var senderRequest = new GetCallScheduleListQuery(educOrgId, dayOfWeek);
+        var senderResponse = await _sender.Send(senderRequest, cancellationToken);
+
+        return Ok(senderResponse);
+    }
+
+    [HttpPost("items")]
+    public async Task<IActionResult> CreateCallScheduleListItem([FromQuery] Guid educOrgId,
+        [FromBody] CreateCallScheduleListItemCommand command,
+        CancellationToken cancellationToken)
+    {
+        try
         {
-            _sender = sender;
+            command.EducOrgId = educOrgId;
+            var senderResponse = await _sender.Send(command, cancellationToken);
+
+            return Created(string.Empty, senderResponse);
         }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetCallScheduleListByEducOrgIdAndDayOfWeek([FromQuery] Guid educOrgId,
-            [FromQuery] DayOfWeek dayOfWeek,
-            CancellationToken cancellationToken)
+        catch (Exception ex)
         {
-            var senderRequest = new GetCallScheduleListQuery(educOrgId, dayOfWeek);
-            var senderResponse = await _sender.Send(senderRequest, cancellationToken);
-
-            return Ok(senderResponse);
+            return BadRequest(ex.Message);
         }
+    }
 
-        [HttpPost("items")]
-        public async Task<IActionResult> CreateCallScheduleListItem([FromQuery] Guid educOrgId,
-            [FromBody] CreateCallScheduleListItemCommand command,
-            CancellationToken cancellationToken)
+    [HttpPut("items/{id:guid}")]
+    public async Task<IActionResult> UpdateCallScheduleListItem([FromRoute] Guid id,
+        UpdateCallScheduleListItemCommand command,
+        CancellationToken cancellationToken)
+    {
+        try
         {
-            try
-            {
-                command.EducOrgId = educOrgId;
-                var senderResponse = await _sender.Send(command, cancellationToken);
+            command.Id = id;
+            var senderResponse = await _sender.Send(command, cancellationToken);
 
-                return Created(string.Empty, senderResponse);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            if (!senderResponse)
+                return BadRequest();
+
+            return NoContent();
         }
-
-        [HttpPut("items/{id:guid}")]
-        public async Task<IActionResult> UpdateCallScheduleListItem([FromRoute] Guid id,
-            UpdateCallScheduleListItemCommand command,
-            CancellationToken cancellationToken)
+        catch (Exception ex)
         {
-            try
-            {
-                command.Id = id;
-                var senderResponse = await _sender.Send(command, cancellationToken);
-
-                if (!senderResponse)
-                    return BadRequest();
-
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return BadRequest(ex.Message);
         }
+    }
 
-        [HttpDelete("items/{id:guid}")]
-        public async Task<IActionResult> DeleteCallScheduleListItem([FromRoute] Guid id,
-            CancellationToken cancellationToken)
+    [HttpDelete("items/{id:guid}")]
+    public async Task<IActionResult> DeleteCallScheduleListItem([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        try
         {
-            try
-            {
-                var command = new DeleteCallScheduleListItemCommand(id);
-                var senderResponse = await _sender.Send(command, cancellationToken);
+            var command = new DeleteCallScheduleListItemCommand(id);
+            var senderResponse = await _sender.Send(command, cancellationToken);
 
-                if (!senderResponse)
-                    return BadRequest(senderResponse);
+            if (!senderResponse)
+                return BadRequest(senderResponse);
 
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 }

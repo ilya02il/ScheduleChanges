@@ -1,12 +1,12 @@
-﻿using Domain.Entities;
+﻿using System;
+using Domain.Entities;
 using Infrastructure.WriteData;
-using System;
 
 namespace Tests.Integration.Helpers
 {
     internal static class DatabaseSeeds
     {
-        public static void Seed(EFWriteDbContext context)
+        public static void Seed(EfWriteDbContext context)
         {
             var educOrg = new EducationalOrgEntity("educOrg1");
             context.EducationalOrgs.Add(educOrg);
