@@ -11,13 +11,12 @@ using Xunit;
 
 namespace Tests.Integration
 {
-    public class EducOrgsControllerTests 
-        : IClassFixture<TestWebApplicationFactory<Startup, TestStartup>>
+    public class EducOrgsControllerTests : IClassFixture<TestWebApplicationFactory>
     {
         private const string BaseRoute = ApiBaseRoute.BaseRoute + "/educational-orgs";
-        private readonly TestWebApplicationFactory<Startup, TestStartup> _factory;
+        private readonly TestWebApplicationFactory _factory;
 
-        public EducOrgsControllerTests(TestWebApplicationFactory<Startup, TestStartup> fixture)
+        public EducOrgsControllerTests(TestWebApplicationFactory fixture)
         {
             _factory = fixture;
         }
@@ -44,7 +43,8 @@ namespace Tests.Integration
                 Name = "educOrg2"
             };
 
-            var result = await client.PostAsync(BaseRoute, TestHelpers.ToJsonBody(body));
+            var result = await client
+                .PostAsync(BaseRoute, TestHelpers.ToJsonBody(body));
 
             var resultContent = result.Content.ReadAsStringAsync().Result.Trim('\"');
 
@@ -62,7 +62,8 @@ namespace Tests.Integration
                 Name = "educOrg1"
             };
 
-            var result = await client.PostAsync(BaseRoute, TestHelpers.ToJsonBody(body));
+            var result = await client
+                .PostAsync(BaseRoute, TestHelpers.ToJsonBody(body));
 
             Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
         }

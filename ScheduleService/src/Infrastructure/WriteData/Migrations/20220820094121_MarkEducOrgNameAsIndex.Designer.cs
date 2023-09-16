@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Migrations
 {
-    [DbContext(typeof(EFWriteDbContext))]
+    [DbContext(typeof(EfWriteDbContext))]
     [Migration("20220820094121_MarkEducOrgNameAsIndex")]
     partial class MarkEducOrgNameAsIndex
     {

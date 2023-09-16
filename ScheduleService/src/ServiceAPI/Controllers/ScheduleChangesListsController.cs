@@ -20,182 +20,181 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ServiceAPI.Controllers
+namespace ServiceAPI.Controllers;
+
+[ApiController]
+[AuthorizeOnJwtSource(Roles = "Admin, EducOrgManager")]
+[Route(ApiBaseRoute.BaseRoute + "/schedule-changes-lists")]
+public class ScheduleChangesListsController : ControllerBase
 {
-    [ApiController]
-    [AuthorizeOnJwtSource(Roles = "Admin, EducOrgManager")]
-    [Route(ApiBaseRoute.BaseRoute + "/schedule-changes-lists")]
-    public class ScheduleChangesListsController : ControllerBase
+    private const string EducOrgIdClaimType = "educ_org_id";
+    private const long MaxFileSize = 100L * 1024L * 1024L;
+
+    private readonly ISender _sender;
+
+    public ScheduleChangesListsController(ISender sender)
     {
-        private const string EducOrgIdClaimType = "educ_org_id";
-        private const long MaxFileSize = 100L * 1024L * 1024L;
+        _sender = sender;
+    }
 
-        private readonly ISender _sender;
+    [HttpGet("{id:guid}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetScheduleChangesListById([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetChangesListByIdQuery(id);
+        var senderResponse = await _sender.Send(query, cancellationToken);
 
-        public ScheduleChangesListsController(ISender sender)
+        return Ok(senderResponse);
+    }
+
+    [HttpGet("brief")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetBriefScheduleChangesListByEducOrgId([FromQuery] Guid educOrgId,
+        CancellationToken cancellationToken)
+    {
+        bool isParsed = Guid.TryParse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType),
+            out Guid eoId);
+
+        if (isParsed)
+            educOrgId = eoId;
+
+        var query = new GetBriefScheduleChangesListsQuery(educOrgId);
+        var senderResponse = await _sender.Send(query, cancellationToken);
+
+        return Ok(senderResponse);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateScheduleChangesList(CreateChangesListCommand command,
+        CancellationToken cancellationToken)
+    {
+        command.EducOrgId = Guid.Parse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType));
+        var senderResponse = await _sender.Send(command, cancellationToken);
+
+        if (!senderResponse)
+            return BadRequest();
+
+        return Ok(senderResponse);
+    }
+
+    [DisableFormValueModelBinding]
+    [RequestSizeLimit(MaxFileSize)]
+    [RequestFormLimits(MultipartBodyLengthLimit = MaxFileSize)]
+    [HttpPost("from-file")]
+    public async Task<IActionResult> CreateScheduleChangesListFromFile([FromQuery] DateTime date,
+        [FromQuery] bool isOddWeek,
+        CancellationToken cancellationToken)
+    {
+        var educOrgId = Guid.Parse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType));
+
+        if (educOrgId == Guid.Empty)
+            return BadRequest("The user claims don't contain an educational organization id claim.");
+
+        if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
+            return BadRequest("Not a multipart request");
+
+        var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType));
+        var reader = new MultipartReader(boundary, Request.Body);
+
+        // note: this is for a single file, you could also process multiple files
+        var section = await reader.ReadNextSectionAsync(cancellationToken);
+
+        if (section == null)
+            return BadRequest("No sections in multipart defined");
+
+        if (!ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition))
+            return BadRequest("No content disposition in multipart defined");
+
+        var fileName = contentDisposition.FileNameStar.ToString();
+        if (string.IsNullOrEmpty(fileName))
         {
-            _sender = sender;
+            fileName = contentDisposition.FileName.ToString();
         }
 
-        [HttpGet("{id:guid}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetScheduleChangesListById([FromRoute] Guid id,
-            CancellationToken cancellationToken)
-        {
-            var query = new GetChangesListByIdQuery(id);
-            var senderResponse = await _sender.Send(query, cancellationToken);
+        if (string.IsNullOrEmpty(fileName))
+            return BadRequest("No filename defined.");
 
-            return Ok(senderResponse);
-        }
+        if (Path.GetExtension(fileName) != ".docx")
+            return new UnsupportedMediaTypeResult();
 
-        [HttpGet("brief")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetBriefScheduleChangesListByEducOrgId([FromQuery] Guid educOrgId,
-            CancellationToken cancellationToken)
-        {
-            bool isParsed = Guid.TryParse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType),
-                out Guid eoId);
+        return default;
 
-            if (isParsed)
-                educOrgId = eoId;
+        //var result = await _changesListsService.CreateScheduleChangesListFromFile(educOrgId,
+        //    date,
+        //    isOddWeek,
+        //    section.Body,
+        //    cancellationToken);
 
-            var query = new GetBriefScheduleChangesListsQuery(educOrgId);
-            var senderResponse = await _sender.Send(query, cancellationToken);
+        //return Ok(result);
+    }
 
-            return Ok(senderResponse);
-        }
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateScheduleChangesListInfo([FromRoute] Guid id,
+        UpdateChangesListCommand command,
+        CancellationToken cancellationToken)
+    {
+        command.Id = id;
+        var senderResponse = await _sender.Send(command, cancellationToken);
 
-        [HttpPost]
-        public async Task<IActionResult> CreateScheduleChangesList(CreateChangesListCommand command,
-            CancellationToken cancellationToken)
-        {
-            command.EducOrgId = Guid.Parse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType));
-            var senderResponse = await _sender.Send(command, cancellationToken);
+        if (!senderResponse)
+            return BadRequest();
 
-            if (!senderResponse)
-                return BadRequest();
+        return Ok(senderResponse);
 
-            return Ok(senderResponse);
-        }
+    }
 
-        [DisableFormValueModelBinding]
-        [RequestSizeLimit(MaxFileSize)]
-        [RequestFormLimits(MultipartBodyLengthLimit = MaxFileSize)]
-        [HttpPost("from-file")]
-        public async Task<IActionResult> CreateScheduleChangesListFromFile([FromQuery] DateTime date,
-            [FromQuery] bool isOddWeek,
-            CancellationToken cancellationToken)
-        {
-            var educOrgId = Guid.Parse(ClaimsHelper.GetClaimValueFromCurrentUserClaims(User, EducOrgIdClaimType));
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteScheduleChangesList([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeleteChangesListCommand(id);
+        var senderResponse = await _sender.Send(command, cancellationToken);
 
-            if (educOrgId == Guid.Empty)
-                return BadRequest("The user claims don't contain an educational organization id claim.");
+        if (!senderResponse)
+            return BadRequest();
 
-            if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
-                return BadRequest("Not a multipart request");
+        return Ok(senderResponse);
+    }
 
-            var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType));
-            var reader = new MultipartReader(boundary, Request.Body);
+    [HttpPost("{listId:guid}/items")]
+    public async Task<IActionResult> CreateScheduleChangesListItem([FromRoute] Guid listId,
+        [FromBody] CreateChangesListItemCommand command,
+        CancellationToken cancellationToken)
+    {
+        command.ListId = listId;
+        var senderResponse = await _sender.Send(command, cancellationToken);
 
-            // note: this is for a single file, you could also process multiple files
-            var section = await reader.ReadNextSectionAsync(cancellationToken);
+        if (!senderResponse)
+            return BadRequest();
 
-            if (section == null)
-                return BadRequest("No sections in multipart defined");
+        return Ok(senderResponse);
+    }
 
-            if (!ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition))
-                return BadRequest("No content disposition in multipart defined");
+    [HttpPut("items/{id:guid}")]
+    public async Task<IActionResult> UpdateScheduleChangesListItem([FromRoute] Guid id,
+        UpdateChangesListItemCommand command,
+        CancellationToken cancellationToken)
+    {
+        command.Id = id;
+        var senderResponse = await _sender.Send(command, cancellationToken);
 
-            var fileName = contentDisposition.FileNameStar.ToString();
-            if (string.IsNullOrEmpty(fileName))
-            {
-                fileName = contentDisposition.FileName.ToString();
-            }
+        if (!senderResponse)
+            return BadRequest();
 
-            if (string.IsNullOrEmpty(fileName))
-                return BadRequest("No filename defined.");
+        return Ok(senderResponse);
+    }
 
-            if (Path.GetExtension(fileName) != ".docx")
-                return new UnsupportedMediaTypeResult();
+    [HttpDelete("items/{id:guid}")]
+    public async Task<IActionResult> DeleteScheduleChangesListItem([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeleteChangesListItemCommand(id);
+        var senderResponse = await _sender.Send(command, cancellationToken);
 
-            return default;
+        if (!senderResponse)
+            return BadRequest();
 
-            //var result = await _changesListsService.CreateScheduleChangesListFromFile(educOrgId,
-            //    date,
-            //    isOddWeek,
-            //    section.Body,
-            //    cancellationToken);
-
-            //return Ok(result);
-        }
-
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateScheduleChangesListInfo([FromRoute] Guid id,
-            UpdateChangesListCommand command,
-            CancellationToken cancellationToken)
-        {
-            command.Id = id;
-            var senderResponse = await _sender.Send(command, cancellationToken);
-
-            if (!senderResponse)
-                return BadRequest();
-
-            return Ok(senderResponse);
-
-        }
-
-        [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> DeleteScheduleChangesList([FromRoute] Guid id,
-            CancellationToken cancellationToken)
-        {
-            var command = new DeleteChangesListCommand(id);
-            var senderResponse = await _sender.Send(command, cancellationToken);
-
-            if (!senderResponse)
-                return BadRequest();
-
-            return Ok(senderResponse);
-        }
-
-        [HttpPost("{listId:guid}/items")]
-        public async Task<IActionResult> CreateScheduleChangesListItem([FromRoute] Guid listId,
-            [FromBody] CreateChangesListItemCommand command,
-            CancellationToken cancellationToken)
-        {
-            command.ListId = listId;
-            var senderResponse = await _sender.Send(command, cancellationToken);
-
-            if (!senderResponse)
-                return BadRequest();
-
-            return Ok(senderResponse);
-        }
-
-        [HttpPut("items/{id:guid}")]
-        public async Task<IActionResult> UpdateScheduleChangesListItem([FromRoute] Guid id,
-            UpdateChangesListItemCommand command,
-            CancellationToken cancellationToken)
-        {
-            command.Id = id;
-            var senderResponse = await _sender.Send(command, cancellationToken);
-
-            if (!senderResponse)
-                return BadRequest();
-
-            return Ok(senderResponse);
-        }
-
-        [HttpDelete("items/{id:guid}")]
-        public async Task<IActionResult> DeleteScheduleChangesListItem([FromRoute] Guid id,
-            CancellationToken cancellationToken)
-        {
-            var command = new DeleteChangesListItemCommand(id);
-            var senderResponse = await _sender.Send(command, cancellationToken);
-
-            if (!senderResponse)
-                return BadRequest();
-
-            return Ok(senderResponse);
-        }
+        return Ok(senderResponse);
     }
 }

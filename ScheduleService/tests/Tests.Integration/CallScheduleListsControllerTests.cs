@@ -14,14 +14,13 @@ using Xunit;
 
 namespace Tests.Integration
 {
-    public class CallScheduleListsControllerTests 
-        : IClassFixture<TestWebApplicationFactory<Startup, TestStartup>>
+    public class CallScheduleListsControllerTests : IClassFixture<TestWebApplicationFactory>
     {
         private const string BaseRoute = ApiBaseRoute.BaseRoute + "/call-schedule-lists";
 
-        private readonly TestWebApplicationFactory<Startup, TestStartup> _factory;
+        private readonly TestWebApplicationFactory _factory;
 
-        public CallScheduleListsControllerTests(TestWebApplicationFactory<Startup, TestStartup> fixture)
+        public CallScheduleListsControllerTests(TestWebApplicationFactory fixture)
         {
             _factory = fixture;
         }
@@ -32,12 +31,12 @@ namespace Tests.Integration
             using var client = _factory.CreateClient();
 
             var educOrgId = await GetEducOrgId(client);
-            var response = await client.GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday}");
+            var response = await client
+                .GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday}");
 
             var responseObj = await response.Content.ReadAsAsync<CallScheduleListDto>();
             var resultListItems = responseObj.ListItems.ToArray();
 
-            ///
             Assert.True(response.IsSuccessStatusCode);
 
             Assert.Equal(DayOfWeek.Monday, responseObj.DayOfWeek);
@@ -66,8 +65,11 @@ namespace Tests.Integration
 
             var educOrgId = await GetEducOrgId(client);
 
-            var result1 = await client.GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Sunday}");
-            var result2 = await client.GetAsync(BaseRoute + $"/?educOrgId={Guid.NewGuid()}&DayOfWeek={DayOfWeek.Monday}");
+            var result1 = await client
+                .GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Sunday}");
+            
+            var result2 = await client
+                .GetAsync(BaseRoute + $"/?educOrgId={Guid.NewGuid()}&DayOfWeek={DayOfWeek.Monday}");
 
             Assert.True(result1.IsSuccessStatusCode && result2.IsSuccessStatusCode);
             Assert.Empty(result1.Content.ReadAsAsync<CallScheduleListDto>().Result.ListItems);
@@ -93,7 +95,9 @@ namespace Tests.Integration
             var result = await client.PostAsync(BaseRoute + $"/items/?educOrgId={educOrgId}",
                 TestHelpers.ToJsonBody(body));
 
-            var getResult = await (await client.GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Sunday}"))
+            var getResult = await (await client.
+                    GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Sunday}")
+                )
                 .Content
                 .ReadAsStringAsync();
 
@@ -130,7 +134,8 @@ namespace Tests.Integration
 
             var educOrgId = await GetEducOrgId(client);
 
-            var callScheduleItemId = client.GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday}")
+            var callScheduleItemId = client
+                .GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday}")
                 .Result
                 .Content
                 .ReadAsAsync<CallScheduleListDto>()
@@ -146,8 +151,8 @@ namespace Tests.Integration
                 EndTime = new TimeSpan(11, 50, 0).Ticks
             };
 
-            var result = await client.PutAsync(BaseRoute + $"/items/{callScheduleItemId}",
-                TestHelpers.ToJsonBody(putBody));
+            var result = await client
+                .PutAsync(BaseRoute + $"/items/{callScheduleItemId}", TestHelpers.ToJsonBody(putBody));
 
             Assert.True(result.IsSuccessStatusCode);
         }
@@ -179,7 +184,8 @@ namespace Tests.Integration
 
             var educOrgId = await GetEducOrgId(client);
 
-            var itemId = client.GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday}")
+            var itemId = client
+                .GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday}")
                 .Result
                 .Content
                 .ReadAsAsync<CallScheduleListDto>()

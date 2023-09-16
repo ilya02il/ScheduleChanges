@@ -8,7 +8,7 @@ using System;
 
 namespace Infrastructure.Migrations
 {
-    [DbContext(typeof(EFWriteDbContext))]
+    [DbContext(typeof(EfWriteDbContext))]
     [Migration("20220506145219_InitMigration")]
     partial class InitMigration
     {

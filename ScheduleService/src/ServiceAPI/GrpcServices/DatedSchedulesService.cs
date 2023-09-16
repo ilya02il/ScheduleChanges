@@ -8,52 +8,51 @@ using DatedSchedules.Messages;
 using DatedSchedules.Service;
 using System.Threading.Tasks;
 
-namespace ServiceAPI.GrpcServices
+namespace ServiceAPI.GrpcServices;
+
+public class DatedSchedulesService : GrpcSchedule.GrpcScheduleBase
 {
-    public class DatedSchedulesService : GrpcSchedule.GrpcScheduleBase
+    private readonly ISender _sender;
+    private readonly IMapper _mapper;
+
+    public DatedSchedulesService(ISender sender, IMapper mapper)
     {
-        private readonly ISender _sender;
-        private readonly IMapper _mapper;
+        _sender = sender;
+        _mapper = mapper;
+    }
 
-        public DatedSchedulesService(ISender sender, IMapper mapper)
+    public async override Task<GetDatedScheduleResponse> GetDatedSchedule(GetDatedScheduleRequest request, ServerCallContext context)
+    {
+        var senderRequest = new GetScheduleWithChangesListQuery()
         {
-            _sender = sender;
-            _mapper = mapper;
-        }
+            Date = request.Date.ToDateTimeOffset(),
+            EducOrgName = request.EducOrgName,
+            GroupNumber = request.GroupNumber
+        };
 
-        public async override Task<GetDatedScheduleResponse> GetDatedSchedule(GetDatedScheduleRequest request, ServerCallContext context)
-        {
-            var senderRequest = new GetScheduleWithChangesListQuery()
-            {
-                Date = request.Date.ToDateTimeOffset(),
-                EducOrgName = request.EducOrgName,
-                GroupNumber = request.GroupNumber
-            };
+        var senderResponse = await _sender.Send(senderRequest, context.CancellationToken);
 
-            var senderResponse = await _sender.Send(senderRequest, context.CancellationToken);
+        return _mapper.Map<GetDatedScheduleResponse>(senderResponse);
+    }
 
-            return _mapper.Map<GetDatedScheduleResponse>(senderResponse);
-        }
+    public async override Task<GetEducOrgsListResponse> GetEducOrgsList(GetEducOrgsListRequest request, ServerCallContext context)
+    {
+        var senderResponse = await _sender.Send(new GetEducOrgsListQuery(), context.CancellationToken);
 
-        public async override Task<GetEducOrgsListResponse> GetEducOrgsList(GetEducOrgsListRequest request, ServerCallContext context)
-        {
-            var senderResponse = await _sender.Send(new GetEducOrgsListQuery(), context.CancellationToken);
+        var response = new GetEducOrgsListResponse();
+        response.EducOrgNamesList.AddRange(senderResponse);
 
-            var response = new GetEducOrgsListResponse();
-            response.EducOrgNamesList.AddRange(senderResponse);
+        return response;
+    }
 
-            return response;
-        }
+    public async override Task<GetGroupNumbersListResponse> GetGroupNumbersList(GetGroupNumbersListRequest request, ServerCallContext context)
+    {
+        var senderResponse = await _sender.Send(new GetGroupNumbersListQuery(request.EducOrgName, request.YearOfStudy),
+            context.CancellationToken);
 
-        public async override Task<GetGroupNumbersListResponse> GetGroupNumbersList(GetGroupNumbersListRequest request, ServerCallContext context)
-        {
-            var senderResponse = await _sender.Send(new GetGroupNumbersListQuery(request.EducOrgName, request.YearOfStudy),
-                context.CancellationToken);
+        var response = new GetGroupNumbersListResponse();
+        response.GroupNumbersList.AddRange(senderResponse);
 
-            var response = new GetGroupNumbersListResponse();
-            response.GroupNumbersList.AddRange(senderResponse);
-
-            return response;
-        }
+        return response;
     }
 }

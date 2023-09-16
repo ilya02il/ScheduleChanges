@@ -3,29 +3,28 @@ using JwtValidation.Service;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ServiceAPI.GrpcClients
+namespace ServiceAPI.GrpcClients;
+
+public class JwtValidationServiceGrpcClient
 {
-    public class JwtValidationServiceGrpcClient
+    private readonly GrpcJwtValidationService.GrpcJwtValidationServiceClient _client;
+
+    public JwtValidationServiceGrpcClient(GrpcJwtValidationService.GrpcJwtValidationServiceClient client)
     {
-        private readonly GrpcJwtValidationService.GrpcJwtValidationServiceClient _client;
+        _client = client;
+    }
 
-        public JwtValidationServiceGrpcClient(GrpcJwtValidationService.GrpcJwtValidationServiceClient client)
+    public async Task<bool> ValidateJwtTokenAsync(string token,
+        CancellationToken cancellationToken)
+    {
+        var request = new ValidateJwtTokenRequest()
         {
-            _client = client;
-        }
+            Token = token
+        };
 
-        public async Task<bool> ValidateJwtTokenAsync(string token,
-            CancellationToken cancellationToken)
-        {
-            var request = new ValidateJwtTokenRequest()
-            {
-                Token = token
-            };
+        var response = await _client.ValidateJwtTokenAsync(request,
+            cancellationToken: cancellationToken);
 
-            var response = await _client.ValidateJwtTokenAsync(request,
-                cancellationToken: cancellationToken);
-
-            return response.IsValid;
-        }
+        return response.IsValid;
     }
 }

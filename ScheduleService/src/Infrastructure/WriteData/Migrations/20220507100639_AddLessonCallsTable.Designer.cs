@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Infrastructure.Migrations
 {
-    [DbContext(typeof(EFWriteDbContext))]
+    [DbContext(typeof(EfWriteDbContext))]
     [Migration("20220507100639_AddLessonCallsTable")]
     partial class AddLessonCallsTable
     {

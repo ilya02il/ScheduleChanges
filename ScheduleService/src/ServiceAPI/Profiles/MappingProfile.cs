@@ -16,103 +16,102 @@ using System;
 using System.Collections.Generic;
 using static DatedSchedules.Messages.GetDatedScheduleResponse.Types;
 
-namespace ServiceAPI.Profiles
+namespace ServiceAPI.Profiles;
+
+public class MappingProfile : Profile
 {
-    public class MappingProfile : Profile
+    public MappingProfile()
     {
-        public MappingProfile()
+        CreateMap(typeof(IEnumerable<>), typeof(RepeatedField<>))
+            .ConvertUsing(typeof(EnumerableToRepeatedFieldTypeConverter<,>));
+
+        CreateMap<Guid, string>()
+            .ConvertUsing(src => src.ToString());
+
+        CreateMap<string, Guid>()
+            .ConvertUsing(src => Guid.Parse(src));
+
+        CreateMap<Duration, TimeSpan>()
+            .ConvertUsing(src => src.ToTimeSpan());
+
+        CreateMap<TimeSpan, Duration>()
+            .ConvertUsing(src => src.ToDuration());
+
+        CreateMap<DateTimeOffset, Timestamp>()
+            .ConvertUsing(src => src.ToTimestamp());
+
+        CreateMap<Timestamp, DateTimeOffset>()
+            .ConvertUsing(src => src.ToDateTimeOffset());
+
+        ////////////////////////////////////////
+
+        CreateMap<ListItemEntity, ScheduleWithChangesListItemDto>()
+            .ForMember(dest => dest.Discipline, act => act.MapFrom(src => src.ItemInfo.SubjectName))
+            .ForMember(dest => dest.Teacher, act => act.MapFrom(src => src.ItemInfo.TeacherInitials))
+            .ForMember(dest => dest.Auditorium, act => act.MapFrom(src => src.ItemInfo.Auditorium))
+            .ForMember(dest => dest.Position, act => act.MapFrom(src => src.ItemInfo.Position));
+
+        CreateMap<ScheduleWithChangesListItemDto, ScheduleItem>();
+
+        CreateMap<ScheduleWithChangesDto, GetDatedScheduleResponse>();
+
+        ////////////////////////////////////////
+
+        CreateMap<LessonCallEntity, CallScheduleListItemDto>()
+            .ForMember(dest => dest.StartTime, act => act.MapFrom(src => src.StartTime.ToString(@"hh\:mm")))
+            .ForMember(dest => dest.EndTime, act => act.MapFrom(src => src.EndTime.ToString(@"hh\:mm")));
+
+        CreateMap<GroupEntity, GroupDto>();
+
+        ////////////////////////////////////////
+
+        CreateMap<ScheduleListItemEntity, ScheduleListItemDto>()
+            .ForMember(dest => dest.Teacher, act => act.MapFrom(src => src.ItemInfo.TeacherInitials))
+            .ForMember(dest => dest.Position, act => act.MapFrom(src => src.ItemInfo.Position))
+            .ForMember(dest => dest.Discipline, act => act.MapFrom(src => src.ItemInfo.SubjectName))
+            .ForMember(dest => dest.Auditorium, act => act.MapFrom(src => src.ItemInfo.Auditorium));
+
+        CreateMap<ScheduleListEntity, ScheduleListDto>();
+
+        CreateMap<ScheduleListItemDto, ItemInfo>()
+            .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.Discipline))
+            .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.Teacher));
+
+        ////////////////////////////////////////
+
+        CreateMap<ChangesListItemDto, ItemInfo>()
+            .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.SubjectName))
+            .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.TeacherInitials));
+
+        CreateMap<ChangesListItemDto, ChangesListItemEntity>()
+            .ForMember(dest => dest.ItemInfo, act => act.MapFrom((src, dest, info, context) => context.Mapper.Map(src, info)));
+
+        CreateMap<CreateChangesListItemCommand, ItemInfo>()
+            .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.Discipline))
+            .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.Teacher));
+
+        CreateMap<CreateChangesListItemCommand, ChangesListItemEntity>()
+            .ForMember(dest => dest.ChangesListId, act => act.MapFrom(src => src.ListId))
+            .ForMember(dest => dest.ItemInfo, act => act.MapFrom((src, dest, info, context) => context.Mapper.Map(src, info)));
+
+        CreateMap<UpdateChangesListItemCommand, ItemInfo>()
+            .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.Discipline))
+            .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.Teacher));
+    }
+
+    private class EnumerableToRepeatedFieldTypeConverter<TiTemSource, TiTemDest>
+        : ITypeConverter<IEnumerable<TiTemSource>, RepeatedField<TiTemDest>>
+    {
+
+        public RepeatedField<TiTemDest> Convert(IEnumerable<TiTemSource> source, RepeatedField<TiTemDest> destination, ResolutionContext context)
         {
-            CreateMap(typeof(IEnumerable<>), typeof(RepeatedField<>))
-                .ConvertUsing(typeof(IEnumerableToRepeatedFieldTypeConverter<,>));
+            destination ??= new RepeatedField<TiTemDest>();
 
-            CreateMap<Guid, string>()
-                .ConvertUsing(src => src.ToString());
-
-            CreateMap<string, Guid>()
-                .ConvertUsing(src => Guid.Parse(src));
-
-            CreateMap<Duration, TimeSpan>()
-                .ConvertUsing(src => src.ToTimeSpan());
-
-            CreateMap<TimeSpan, Duration>()
-                .ConvertUsing(src => src.ToDuration());
-
-            CreateMap<DateTimeOffset, Timestamp>()
-                .ConvertUsing(src => src.ToTimestamp());
-
-            CreateMap<Timestamp, DateTimeOffset>()
-                .ConvertUsing(src => src.ToDateTimeOffset());
-
-            ////////////////////////////////////////
-
-            CreateMap<ListItemEntity, ScheduleWithChangesListItemDto>()
-                .ForMember(dest => dest.Discipline, act => act.MapFrom(src => src.ItemInfo.SubjectName))
-                .ForMember(dest => dest.Teacher, act => act.MapFrom(src => src.ItemInfo.TeacherInitials))
-                .ForMember(dest => dest.Auditorium, act => act.MapFrom(src => src.ItemInfo.Auditorium))
-                .ForMember(dest => dest.Position, act => act.MapFrom(src => src.ItemInfo.Position));
-
-            CreateMap<ScheduleWithChangesListItemDto, ScheduleItem>();
-
-            CreateMap<ScheduleWithChangesDto, GetDatedScheduleResponse>();
-
-            ////////////////////////////////////////
-
-            CreateMap<LessonCallEntity, CallScheduleListItemDto>()
-                .ForMember(dest => dest.StartTime, act => act.MapFrom(src => src.StartTime.ToString(@"hh\:mm")))
-                .ForMember(dest => dest.EndTime, act => act.MapFrom(src => src.EndTime.ToString(@"hh\:mm")));
-
-            CreateMap<GroupEntity, GroupDto>();
-
-            ////////////////////////////////////////
-
-            CreateMap<ScheduleListItemEntity, ScheduleListItemDto>()
-                .ForMember(dest => dest.Teacher, act => act.MapFrom(src => src.ItemInfo.TeacherInitials))
-                .ForMember(dest => dest.Position, act => act.MapFrom(src => src.ItemInfo.Position))
-                .ForMember(dest => dest.Discipline, act => act.MapFrom(src => src.ItemInfo.SubjectName))
-                .ForMember(dest => dest.Auditorium, act => act.MapFrom(src => src.ItemInfo.Auditorium));
-
-            CreateMap<ScheduleListEntity, ScheduleListDto>();
-
-            CreateMap<ScheduleListItemDto, ItemInfo>()
-                .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.Discipline))
-                .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.Teacher));
-
-            ////////////////////////////////////////
-
-            CreateMap<ChangesListItemDto, ItemInfo>()
-                .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.SubjectName))
-                .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.TeacherInitials));
-
-            CreateMap<ChangesListItemDto, ChangesListItemEntity>()
-                .ForMember(dest => dest.ItemInfo, act => act.MapFrom((src, dest, info, context) => context.Mapper.Map(src, info)));
-
-            CreateMap<CreateChangesListItemCommand, ItemInfo>()
-                .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.Discipline))
-                .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.Teacher));
-
-            CreateMap<CreateChangesListItemCommand, ChangesListItemEntity>()
-                .ForMember(dest => dest.ChangesListId, act => act.MapFrom(src => src.ListId))
-                .ForMember(dest => dest.ItemInfo, act => act.MapFrom((src, dest, info, context) => context.Mapper.Map(src, info)));
-
-            CreateMap<UpdateChangesListItemCommand, ItemInfo>()
-                .ForMember(dest => dest.SubjectName, act => act.MapFrom(src => src.Discipline))
-                .ForMember(dest => dest.TeacherInitials, act => act.MapFrom(src => src.Teacher));
-        }
-
-        private class IEnumerableToRepeatedFieldTypeConverter<TITemSource, TITemDest>
-            : ITypeConverter<IEnumerable<TITemSource>, RepeatedField<TITemDest>>
-        {
-
-            public RepeatedField<TITemDest> Convert(IEnumerable<TITemSource> source, RepeatedField<TITemDest> destination, ResolutionContext context)
+            foreach (var item in source)
             {
-                destination ??= new RepeatedField<TITemDest>();
-
-                foreach (var item in source)
-                {
-                    destination.Add(context.Mapper.Map<TITemDest>(item));
-                }
-                return destination;
+                destination.Add(context.Mapper.Map<TiTemDest>(item));
             }
+            return destination;
         }
     }
 }

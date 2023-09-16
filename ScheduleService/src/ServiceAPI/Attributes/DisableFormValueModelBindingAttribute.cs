@@ -2,21 +2,20 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 
-namespace ServiceAPI.Attributes
-{
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-    public class DisableFormValueModelBindingAttribute : Attribute, IResourceFilter
-    {
-        public void OnResourceExecuting(ResourceExecutingContext context)
-        {
-            var factories = context.ValueProviderFactories;
-            factories.RemoveType<FormValueProviderFactory>();
-            factories.RemoveType<FormFileValueProviderFactory>();
-            factories.RemoveType<JQueryFormValueProviderFactory>();
-        }
+namespace ServiceAPI.Attributes;
 
-        public void OnResourceExecuted(ResourceExecutedContext context)
-        {
-        }
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public class DisableFormValueModelBindingAttribute : Attribute, IResourceFilter
+{
+    public void OnResourceExecuting(ResourceExecutingContext context)
+    {
+        var factories = context.ValueProviderFactories;
+        factories.RemoveType<FormValueProviderFactory>();
+        factories.RemoveType<FormFileValueProviderFactory>();
+        factories.RemoveType<JQueryFormValueProviderFactory>();
+    }
+
+    public void OnResourceExecuted(ResourceExecutedContext context)
+    {
     }
 }

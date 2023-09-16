@@ -3,64 +3,63 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace ServiceAPI.DependencyInjection
+namespace ServiceAPI.DependencyInjection;
+
+public static class AuthenticationSetup
 {
-    public static class AuthenticationSetup
+    public static IServiceCollection AddServiceAuthentiction(this IServiceCollection services)
     {
-        public static IServiceCollection AddServiceAuthentiction(this IServiceCollection services)
-        {
-            services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
-                })/*.AddCertificate(options =>
+            })/*.AddCertificate(options =>
+            {
+                options.AllowedCertificateTypes = CertificateTypes.All;
+                options.Events = new CertificateAuthenticationEvents
                 {
-                    options.AllowedCertificateTypes = CertificateTypes.All;
-                    options.Events = new CertificateAuthenticationEvents
+                    OnCertificateValidated = context =>
                     {
-                        OnCertificateValidated = context =>
+                        var claims = new[]
                         {
-                            var claims = new[]
-                            {
-                                    new Claim(ClaimTypes.Name,
-                                        context.ClientCertificate.Subject,
-                                        ClaimValueTypes.String,
-                                        context.Options.ClaimsIssuer)
-                                };
+                                new Claim(ClaimTypes.Name,
+                                    context.ClientCertificate.Subject,
+                                    ClaimValueTypes.String,
+                                    context.Options.ClaimsIssuer)
+                            };
 
-                            context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name));
-                            context.Success();
+                        context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name));
+                        context.Success();
 
-                            return Task.CompletedTask;
-                        },
-                        OnAuthenticationFailed = context =>
-                        {
-                            context.NoResult();
-                            context.Response.StatusCode = 403;
-
-                            return Task.CompletedTask;
-                        }
-                    };
-                })*/
-                .AddJwtBearer(options =>
-                {
-                    options.RequireHttpsMetadata = false;
-                    options.TokenValidationParameters = new TokenValidationParameters()
+                        return Task.CompletedTask;
+                    },
+                    OnAuthenticationFailed = context =>
                     {
-                        ValidateIssuerSigningKey = false,
-                        RequireSignedTokens = false,
-                        SignatureValidator = (token, parameters) => new JwtSecurityToken(token),
+                        context.NoResult();
+                        context.Response.StatusCode = 403;
 
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ValidateActor = false,
-                        ValidateLifetime = true
-                    };
-                });
+                        return Task.CompletedTask;
+                    }
+                };
+            })*/
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuerSigningKey = false,
+                    RequireSignedTokens = false,
+                    SignatureValidator = (token, parameters) => new JwtSecurityToken(token),
 
-            return services;
-        }
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateActor = false,
+                    ValidateLifetime = true
+                };
+            });
+
+        return services;
     }
 }

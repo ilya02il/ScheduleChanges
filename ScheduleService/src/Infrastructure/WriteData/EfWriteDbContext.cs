@@ -6,9 +6,9 @@ using Infrastructure.WriteData.Configurations;
 
 namespace Infrastructure.WriteData
 {
-    public class EFWriteDbContext : DbContext, IWriteDbContext
+    public sealed class EfWriteDbContext : DbContext, IWriteDbContext
     {
-        public EFWriteDbContext(DbContextOptions options) : base(options)
+        public EfWriteDbContext(DbContextOptions options) : base(options)
         { }
 
         public DbSet<ListItemEntity> ListItems { get; set; }
@@ -20,6 +20,8 @@ namespace Infrastructure.WriteData
         public DbSet<GroupEntity> Groups { get; set; }
         public DbSet<LessonCallEntity> LessonCalls { get; set; }
         public DbSet<DatedLessonCallEntity> DatedLessonCalls { get; set; }
+
+        public EfWriteDbContext() => Database.EnsureCreated();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

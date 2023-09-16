@@ -1,80 +1,53 @@
-using Infrastructure.WriteData;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading.Tasks;
+using ServiceAPI;
+using ServiceAPI.Extensions;
+using ServiceAPI.GrpcServices;
 
-namespace ServiceAPI
+var builder = WebApplication.CreateBuilder(args);
+
+builder.ConfigureWebHost();
+builder.ConfigureServices();
+
+var application = builder.Build();
+
+if (application.Environment.IsDevelopment())
 {
-    public class Program
-    {
-        public static async Task Main(string[] args)
-        {
-            var host = CreateHostBuilder(args).Build();
-
-            using var scope = host.Services.CreateScope();
-
-            var services = scope.ServiceProvider;
-
-            var context = services.GetRequiredService<EFWriteDbContext>();
-
-            await context.Database.EnsureCreatedAsync();
-
-            await host.RunAsync();
-        }
-
-        public static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            return Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    int grpcPort;
-                    int webApiPort;
-
-                    var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-                    if (env == "Development")
-                    {
-                        grpcPort = 5200;
-                        webApiPort = 5000;
-                    }
-
-                    else
-                    {
-                        grpcPort = Convert.ToInt32(Environment.GetEnvironmentVariable("GRPC_PORT"));
-                        webApiPort = Convert.ToInt32(Environment.GetEnvironmentVariable("WEB_API_PORT"));
-                    }
-
-                    builder.UseKestrel(options =>
-                    {
-                        //options.ConfigureHttpsDefaults(options =>
-                        //{
-                        //    options.ServerCertificate =
-                        //        new X509Certificate2("Certs\\cert-development.pfx", "93phCKFh_");
-
-                        //    //options.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
-                        //});
-
-                        options.ListenAnyIP(grpcPort, opt =>
-                        {
-                            opt.Protocols = HttpProtocols.Http2;
-                        });
-                        options.ListenAnyIP(webApiPort, opt =>
-                        {
-                            opt.Protocols = HttpProtocols.Http1;
-                        });
-                        //options.ListenAnyIP(80, options =>
-                        //{
-                        //    options.Protocols = HttpProtocols.Http1AndHttp2;
-                        //    options.UseHttps();
-                        //});
-                    });
-
-                    builder.UseStartup<Startup>();
-                });
-        }
-            
-    }
+    application.UseDeveloperExceptionPage();
 }
+
+application.UseSwagger(options =>
+{
+    options.RouteTemplate = ApiBaseRoute.BaseRoute + "/docs/swagger/{documentName}/swagger.json";
+});
+application.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint($"/{ApiBaseRoute.BaseRoute}/docs/swagger/v1/swagger.json", "Admin Website API v1");
+    options.RoutePrefix = ApiBaseRoute.BaseRoute + "/docs/swagger";
+});
+
+application.UseRouting();
+
+application.UseCors(policyBuilder =>
+{
+    policyBuilder
+        .SetIsOriginAllowed(_ => true)
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
+});
+
+application.UseAuthentication();
+application.UseAuthorization();
+
+application.UseEndpoints(endpoints =>
+{
+    endpoints.MapGrpcService<DatedSchedulesService>();
+    endpoints.MapControllers();
+});
+
+application.Run();
+
+// Для интеграционного тестирования,
+// чтобы можно было создать фабрику веб-приложения. 
+public partial class Program { }
