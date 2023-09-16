@@ -14,14 +14,13 @@ using Xunit;
 
 namespace Tests.Integration
 {
-    public class GroupsControllerTests
-        : IClassFixture<TestWebApplicationFactory<Startup, TestStartup>>
+    public class GroupsControllerTests : IClassFixture<TestWebApplicationFactory>
     {
         private const string BaseRoute = ApiBaseRoute.BaseRoute + "/groups";
 
-        private readonly TestWebApplicationFactory<Startup, TestStartup> _factory;
+        private readonly TestWebApplicationFactory _factory;
 
-        public GroupsControllerTests(TestWebApplicationFactory<Startup, TestStartup> fixture)
+        public GroupsControllerTests(TestWebApplicationFactory fixture)
         {
             _factory = fixture;
         }
@@ -52,7 +51,9 @@ namespace Tests.Integration
 
             var educOrgId = await GetEducOrgId(client);
 
-            var result = await client.GetAsync(BaseRoute + $"/brief/?educOrgId={educOrgId}");
+            var result = await client
+                .GetAsync(BaseRoute + $"/brief/?educOrgId={educOrgId}");
+            
             var resultBody = await result.Content.ReadAsAsync<List<BriefGroupDto>>();
 
             Assert.True(result.IsSuccessStatusCode);
@@ -75,7 +76,9 @@ namespace Tests.Integration
                 YearOfStudy = 3
             };
 
-            var result = await client.PostAsync(BaseRoute, TestHelpers.ToJsonBody(body));
+            var result = await client
+                .PostAsync(BaseRoute, TestHelpers.ToJsonBody(body));
+            
             var resultBody = result.Content
                 .ReadAsStringAsync()
                 .Result
@@ -99,9 +102,14 @@ namespace Tests.Integration
                 YearOfStudy = 3
             };
 
-            var result = await client.PostAsync(BaseRoute, TestHelpers.ToJsonBody(body));
+            var result = await client
+                .PostAsync(BaseRoute, TestHelpers.ToJsonBody(body));
 
-            var test = result.Content.Headers.FirstOrDefault(x => x.Key == "Location").Value;
+            var test = result
+                .Content
+                .Headers
+                .FirstOrDefault(x => x.Key == "Location")
+                .Value;
         }
 
         [Fact]
@@ -125,7 +133,8 @@ namespace Tests.Integration
                 YearOfStudy = 3
             };
 
-            var result = await client.PutAsync(BaseRoute + '/' + groupId, TestHelpers.ToJsonBody(body));
+            var result = await client
+                .PutAsync(BaseRoute + '/' + groupId, TestHelpers.ToJsonBody(body));
 
             Assert.Equal(HttpStatusCode.NoContent, result.StatusCode);
         }

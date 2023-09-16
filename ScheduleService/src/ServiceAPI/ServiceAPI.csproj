@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Tests.Integration" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Protos\dated-schedules-messages.proto" />
     <None Remove="Protos\dated-schedules-service.proto" />
     <None Remove="Protos\jwt-validation-messages.proto" />
@@ -17,9 +21,9 @@
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.46.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="5.0.13" />
-    <PackageReference Include="microsoft.aspnetcore.authentication.jwtbearer" Version="5.0.13" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.13">
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="6.0.22" />
+    <PackageReference Include="microsoft.aspnetcore.authentication.jwtbearer" Version="6.0.22" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.22">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

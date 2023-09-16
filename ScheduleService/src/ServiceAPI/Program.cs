@@ -47,3 +47,7 @@ application.UseEndpoints(endpoints =>
 });
 
 application.Run();
+
+// Для интеграционного тестирования,
+// чтобы можно было создать фабрику веб-приложения. 
+public partial class Program { }

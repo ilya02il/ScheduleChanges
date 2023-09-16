@@ -22,7 +22,6 @@ namespace Infrastructure
             services.AddScoped<IReadDapperContext>(fact => new DapperContext(sqlServerConnection));
             services.AddTransient<ITableFileParser<ItemInfo>, WordTableFileParser<ItemInfo>>();
 
-
             return services;
         }
     }
