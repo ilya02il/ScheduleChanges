@@ -8,8 +8,9 @@ namespace Infrastructure.WriteData
 {
     public sealed class EfWriteDbContext : DbContext, IWriteDbContext
     {
-        public EfWriteDbContext(DbContextOptions options) : base(options)
-        { }
+        public EfWriteDbContext() { }
+        
+        public EfWriteDbContext(DbContextOptions options) : base(options) { }
 
         public DbSet<ListItemEntity> ListItems { get; set; }
         public DbSet<ScheduleListEntity> ScheduleLists { get; set; }
@@ -19,10 +20,9 @@ namespace Infrastructure.WriteData
         public DbSet<EducationalOrgEntity> EducationalOrgs { get; set; }
         public DbSet<GroupEntity> Groups { get; set; }
         public DbSet<LessonCallEntity> LessonCalls { get; set; }
+        
         public DbSet<DatedLessonCallEntity> DatedLessonCalls { get; set; }
-
-        public EfWriteDbContext() => Database.EnsureCreated();
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new ListItemConfiguration());

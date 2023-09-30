@@ -1,8 +1,7 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
-using ServiceAPI;
-using ServiceAPI.Extensions;
-using ServiceAPI.GrpcServices;
+using Infrastructure.WriteData;
+using ScheduleService.ServiceAPI.API.v1;
+using ScheduleService.ServiceAPI.Extensions;
+using ScheduleService.ServiceAPI.GrpcServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,22 +10,33 @@ builder.ConfigureServices();
 
 var application = builder.Build();
 
-if (application.Environment.IsDevelopment())
+var isDevelopmentEnv = application.Environment.IsDevelopment();
+var isSwaggerEnabled = Convert.ToBoolean(Environment.GetEnvironmentVariable("IS_SWAGGER_ENABLED"));
+
+if (isDevelopmentEnv)
 {
     application.UseDeveloperExceptionPage();
 }
 
-application.UseSwagger(options =>
+if (isDevelopmentEnv || isSwaggerEnabled)
 {
-    options.RouteTemplate = ApiBaseRoute.BaseRoute + "/docs/swagger/{documentName}/swagger.json";
-});
-application.UseSwaggerUI(options =>
-{
-    options.SwaggerEndpoint($"/{ApiBaseRoute.BaseRoute}/docs/swagger/v1/swagger.json", "Admin Website API v1");
-    options.RoutePrefix = ApiBaseRoute.BaseRoute + "/docs/swagger";
-});
-
-application.UseRouting();
+    application.UseSwagger(options =>
+    {
+        options.RouteTemplate = "/api/{documentName}/docs/swagger.json";
+    });
+    application.UseSwaggerUI(options =>
+    {
+        options.RoutePrefix = "";
+        
+        foreach (var description in application.DescribeApiVersions())
+        {
+            var url = $"api/{description.GroupName}/docs/swagger.json";
+            var name = $"Schedule Service API {description.GroupName}";
+            
+            options.SwaggerEndpoint(url, name);
+        }
+    });
+}
 
 application.UseCors(policyBuilder =>
 {
@@ -40,14 +50,16 @@ application.UseCors(policyBuilder =>
 application.UseAuthentication();
 application.UseAuthorization();
 
-application.UseEndpoints(endpoints =>
-{
-    endpoints.MapGrpcService<DatedSchedulesService>();
-    endpoints.MapControllers();
-});
+var api = application
+    .NewVersionedApi("ScheduleServiceApi")
+    .MapGroup("/api/v{version:apiVersion}");
+
+api.MapApiV1();
+
+application.MapGrpcService<DatedSchedulesService>();
 
 application.Run();
 
-// Для интеграционного тестирования,
-// чтобы можно было создать фабрику веб-приложения. 
+// Для интеграционного тестирования
+// (чтобы можно было создать фабрику веб-приложения). 
 public partial class Program { }

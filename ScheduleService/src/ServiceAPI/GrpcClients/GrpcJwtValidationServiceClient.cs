@@ -1,9 +1,7 @@
 ﻿using JwtValidation.Messages;
 using JwtValidation.Service;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace ServiceAPI.GrpcClients;
+namespace ScheduleService.ServiceAPI.GrpcClients;
 
 public class JwtValidationServiceGrpcClient
 {

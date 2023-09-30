@@ -1,8 +1,6 @@
 ﻿using Microsoft.Net.Http.Headers;
-using System;
-using System.IO;
 
-namespace ServiceAPI.Helpers;
+namespace ScheduleService.ServiceAPI.Helpers;
 
 public class MultipartRequestHelper
 {
