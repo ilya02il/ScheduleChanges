@@ -38,14 +38,14 @@ if (isDevelopmentEnv || isSwaggerEnabled)
     });
 }
 
-application.UseCors(policyBuilder =>
-{
-    policyBuilder
-        .SetIsOriginAllowed(_ => true)
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials();
-});
+// application.UseCors(policyBuilder =>
+// {
+//     policyBuilder
+//         .SetIsOriginAllowed(_ => true)
+//         .AllowAnyMethod()
+//         .AllowAnyHeader()
+//         .AllowCredentials();
+// });
 
 application.UseAuthentication();
 application.UseAuthorization();

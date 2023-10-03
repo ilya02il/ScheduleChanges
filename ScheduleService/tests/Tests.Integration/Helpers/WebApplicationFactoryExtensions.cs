@@ -29,7 +29,8 @@ namespace Tests.Integration.Helpers
             TestClaimsProvider claimsProvider)
             where T : class
         {
-            var client = factory.WithAuthentication(claimsProvider)
+            var client = factory
+                .WithAuthentication(claimsProvider)
                 .CreateClient(new() { AllowAutoRedirect = true });
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test", Guid.NewGuid().ToString());

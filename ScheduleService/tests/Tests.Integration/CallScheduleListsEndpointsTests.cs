@@ -1,26 +1,26 @@
-﻿using Application.CallSchedules.Dtos;
-using Application.Tests.Integration.Helpers;
+﻿using System.Net;
+using Application.CallSchedules.Dtos;
+using Application.EducOrgs.Dtos;
 using Domain.Entities;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Newtonsoft.Json;
-using ServiceAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Tests.Integration.Helpers;
 using Xunit;
 
 namespace Tests.Integration
 {
-    public class CallScheduleListsControllerTests : IClassFixture<TestWebApplicationFactory>
+    public class CallScheduleListsEndpointsTests : IClassFixture<TestWebApplicationFactory>
     {
-        private const string BaseRoute = ApiBaseRoute.BaseRoute + "/call-schedule-lists";
+        private static readonly WebApplicationFactoryClientOptions ClientOptions = new()
+        {
+            BaseAddress = new Uri("http://localhost:5000/api/v1/call-schedule-lists")
+        };
+        
+        private const string BaseRoute = "/api/v1/call-schedule-lists";
 
         private readonly TestWebApplicationFactory _factory;
 
-        public CallScheduleListsControllerTests(TestWebApplicationFactory fixture)
+        public CallScheduleListsEndpointsTests(TestWebApplicationFactory fixture)
         {
             _factory = fixture;
         }
@@ -28,11 +28,11 @@ namespace Tests.Integration
         [Fact]
         public async Task Get_ByEducOrgIdAndDayOfWeek_Should_Return_Right_Result()
         {
-            using var client = _factory.CreateClient();
+            using var client = _factory.CreateClient(ClientOptions);
 
             var educOrgId = await GetEducOrgId(client);
             var response = await client
-                .GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday}");
+                .GetAsync($"?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday:D}");
 
             var responseObj = await response.Content.ReadAsAsync<CallScheduleListDto>();
             var resultListItems = responseObj.ListItems.ToArray();
@@ -66,10 +66,10 @@ namespace Tests.Integration
             var educOrgId = await GetEducOrgId(client);
 
             var result1 = await client
-                .GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Sunday}");
+                .GetAsync($"{BaseRoute}/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Sunday:D}");
             
             var result2 = await client
-                .GetAsync(BaseRoute + $"/?educOrgId={Guid.NewGuid()}&DayOfWeek={DayOfWeek.Monday}");
+                .GetAsync($"{BaseRoute}/?educOrgId={Guid.NewGuid()}&DayOfWeek={DayOfWeek.Monday:D}");
 
             Assert.True(result1.IsSuccessStatusCode && result2.IsSuccessStatusCode);
             Assert.Empty(result1.Content.ReadAsAsync<CallScheduleListDto>().Result.ListItems);
@@ -92,11 +92,13 @@ namespace Tests.Integration
                 EndTime = new TimeSpan(10, 5, 0).Ticks,
             };
 
-            var result = await client.PostAsync(BaseRoute + $"/items/?educOrgId={educOrgId}",
-                TestHelpers.ToJsonBody(body));
+            var result = await client.PostAsync(
+                $"{BaseRoute}/items/?educOrgId={educOrgId}",
+                TestHelpers.ToJsonBody(body)
+            );
 
             var getResult = await (await client.
-                    GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Sunday}")
+                    GetAsync($"{BaseRoute}/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Sunday:D}")
                 )
                 .Content
                 .ReadAsStringAsync();
@@ -120,8 +122,10 @@ namespace Tests.Integration
                 EndTime = new TimeSpan(10, 5, 0).Ticks,
             };
 
-            var result = await client.PostAsync(BaseRoute + $"/items/?educOrgId={Guid.NewGuid()}",
-                TestHelpers.ToJsonBody(body));
+            var result = await client.PostAsync(
+                $"{BaseRoute}/items/?educOrgId={Guid.NewGuid()}",
+                TestHelpers.ToJsonBody(body)
+            );
 
             Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
         }
@@ -135,7 +139,7 @@ namespace Tests.Integration
             var educOrgId = await GetEducOrgId(client);
 
             var callScheduleItemId = client
-                .GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday}")
+                .GetAsync($"{BaseRoute}/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday:D}")
                 .Result
                 .Content
                 .ReadAsAsync<CallScheduleListDto>()
@@ -152,7 +156,7 @@ namespace Tests.Integration
             };
 
             var result = await client
-                .PutAsync(BaseRoute + $"/items/{callScheduleItemId}", TestHelpers.ToJsonBody(putBody));
+                .PutAsync($"{BaseRoute}/items/{callScheduleItemId}", TestHelpers.ToJsonBody(putBody));
 
             Assert.True(result.IsSuccessStatusCode);
         }
@@ -185,7 +189,7 @@ namespace Tests.Integration
             var educOrgId = await GetEducOrgId(client);
 
             var itemId = client
-                .GetAsync(BaseRoute + $"/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday}")
+                .GetAsync($"{BaseRoute}/?educOrgId={educOrgId}&dayOfWeek={DayOfWeek.Monday:D}")
                 .Result
                 .Content
                 .ReadAsAsync<CallScheduleListDto>()
@@ -194,7 +198,7 @@ namespace Tests.Integration
                 .First()
                 .Id;
 
-            var result = await client.DeleteAsync(BaseRoute + $"/items/{itemId}");
+            var result = await client.DeleteAsync($"{BaseRoute}/items/{itemId}");
 
             Assert.True(result.IsSuccessStatusCode);
         }
@@ -205,19 +209,19 @@ namespace Tests.Integration
             using var client = _factory
                 .CreateClientWithTestAuth(new TestClaimsProvider("EducOrgManager"));
 
-            var result = await client.DeleteAsync(BaseRoute + $"/items/{Guid.NewGuid()}");
+            var result = await client.DeleteAsync($"{BaseRoute}/items/{Guid.NewGuid()}");
 
             Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
         }
 
-        private static async Task<Guid> GetEducOrgId(HttpClient client)
+        private static async Task<Guid?> GetEducOrgId(HttpClient client)
         {
-            var response = await client.GetAsync(ApiBaseRoute.BaseRoute + "/educational-orgs/brief");
+            var response = await client.GetAsync($"/api/v1/educational-orgs/brief");
             var educOrgsJsonString = await response.Content.ReadAsStringAsync();
 
-            return JsonConvert.DeserializeObject<IEnumerable<EducationalOrgEntity>>(educOrgsJsonString)
-                .First()
-                .Id;
+            return JsonConvert.DeserializeObject<IEnumerable<BriefEducOrgDto>>(educOrgsJsonString)
+                ?.FirstOrDefault()
+                ?.Id;
         }
     }
 }

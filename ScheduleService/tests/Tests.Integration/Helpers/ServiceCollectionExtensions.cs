@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
 
-namespace Application.Tests.Integration.Helpers
+namespace Tests.Integration.Helpers
 {
     public static class ServiceCollectionExtensions
     {
