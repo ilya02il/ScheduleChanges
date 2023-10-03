@@ -1,7 +1,4 @@
 ﻿using System.Data.Common;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Infrastructure;
 using Infrastructure.WriteData;
 using JwtValidation.Messages;
@@ -12,12 +9,11 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using ServiceAPI.GrpcClients;
+using ScheduleService.ServiceAPI.GrpcClients;
 using Testcontainers.MsSql;
-using Tests.Integration.Helpers;
 using Xunit;
 
-namespace Application.Tests.Integration.Helpers
+namespace Tests.Integration.Helpers
 {
     public class TestWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {

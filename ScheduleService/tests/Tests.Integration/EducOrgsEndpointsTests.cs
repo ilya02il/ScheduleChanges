@@ -1,22 +1,16 @@
-﻿using Application.EducOrgs.Dtos;
-using Application.Tests.Integration.Helpers;
-using ServiceAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Net;
+using Application.EducOrgs.Dtos;
 using Tests.Integration.Helpers;
 using Xunit;
 
 namespace Tests.Integration
 {
-    public class EducOrgsControllerTests : IClassFixture<TestWebApplicationFactory>
+    public class EducOrgsEndpointsTests : IClassFixture<TestWebApplicationFactory>
     {
-        private const string BaseRoute = ApiBaseRoute.BaseRoute + "/educational-orgs";
+        private const string BaseRoute = "api/v1/educational-orgs";
         private readonly TestWebApplicationFactory _factory;
 
-        public EducOrgsControllerTests(TestWebApplicationFactory fixture)
+        public EducOrgsEndpointsTests(TestWebApplicationFactory fixture)
         {
             _factory = fixture;
         }

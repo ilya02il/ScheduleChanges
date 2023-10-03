@@ -12,11 +12,9 @@ using Domain.Entities;
 using Domain.ValueObjects;
 using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
-using System;
-using System.Collections.Generic;
 using static DatedSchedules.Messages.GetDatedScheduleResponse.Types;
 
-namespace ServiceAPI.Profiles;
+namespace ScheduleService.ServiceAPI.Profiles;
 
 public class MappingProfile : Profile
 {

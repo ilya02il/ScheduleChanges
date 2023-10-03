@@ -1,26 +1,19 @@
-﻿using Application.Groups.Dtos;
-using Application.Tests.Integration.Helpers;
+﻿using System.Net;
+using Application.Groups.Dtos;
 using Domain.Entities;
 using Newtonsoft.Json;
-using ServiceAPI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Tests.Integration.Helpers;
 using Xunit;
 
 namespace Tests.Integration
 {
-    public class GroupsControllerTests : IClassFixture<TestWebApplicationFactory>
+    public class GroupsEndpointsTests : IClassFixture<TestWebApplicationFactory>
     {
-        private const string BaseRoute = ApiBaseRoute.BaseRoute + "/groups";
+        private const string BaseRoute = "api/v1/groups";
 
         private readonly TestWebApplicationFactory _factory;
 
-        public GroupsControllerTests(TestWebApplicationFactory fixture)
+        public GroupsEndpointsTests(TestWebApplicationFactory fixture)
         {
             _factory = fixture;
         }
@@ -161,7 +154,7 @@ namespace Tests.Integration
 
         private static async Task<Guid> GetEducOrgId(HttpClient client)
         {
-            var response = await client.GetAsync(ApiBaseRoute.BaseRoute + "/educational-orgs/brief");
+            var response = await client.GetAsync(BaseRoute + "/educational-orgs/brief");
             var educOrgsJsonString = await response.Content.ReadAsStringAsync();
 
             return JsonConvert.DeserializeObject<IEnumerable<EducationalOrgEntity>>(educOrgsJsonString)

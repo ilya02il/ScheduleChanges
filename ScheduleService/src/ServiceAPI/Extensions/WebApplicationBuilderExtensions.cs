@@ -1,18 +1,16 @@
-using System;
 using System.Reflection;
 using Application;
+using Asp.Versioning;
 using Infrastructure;
 using JwtValidation.Service;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using ServiceAPI.DependencyInjection;
-using ServiceAPI.GrpcClients;
+using ScheduleService.ServiceAPI.Authorization.Handlers;
+using ScheduleService.ServiceAPI.DependencyInjection;
+using ScheduleService.ServiceAPI.GrpcClients;
+using ScheduleService.ServiceAPI.OptionsConfigurators;
 
-namespace ServiceAPI.Extensions;
+namespace ScheduleService.ServiceAPI.Extensions;
 
 /// <summary>
 /// Статический класс с методами расширения для конфигурации веб-приложения
@@ -54,30 +52,61 @@ internal static class WebApplicationBuilderExtensions
     {
         var sqlServerConnection = builder.Environment.IsDevelopment()
             ? builder.Configuration.GetConnectionString("DefaultConnection")
-            : Environment.GetEnvironmentVariable("SQL_SERVER_CONNECTION") ?? string.Empty;
+            : Environment.GetEnvironmentVariable("SQL_SERVER_CONNECTION");
 
         var grpcValidationConnection = builder.Environment.IsDevelopment()
             ? builder.Configuration.GetConnectionString("GrpcJwtValidationServiceConnection")
-            : Environment.GetEnvironmentVariable("GRPC_JWT_VALIDATION_CONNECTION") ?? string.Empty;
+            : Environment.GetEnvironmentVariable("GRPC_JWT_VALIDATION_CONNECTION");
 
         builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
         builder.Services.AddApplication();
-        builder.Services.AddInfrastructure(sqlServerConnection);
+        builder.Services.AddInfrastructure(sqlServerConnection ?? string.Empty);
+
+        builder.Services.AddAuthorizationBuilder();
+        builder.Services.AddScoped<IAuthorizationHandler, JwtSourceAuthorizationHandler>();
+        builder.Services.AddScoped<IAuthorizationHandler, RoleBasedAuthorizationHandler>();
 
         builder.Services.AddGrpc();
         builder
             .Services
             .AddGrpcClient<GrpcJwtValidationService.GrpcJwtValidationServiceClient>(options =>
             {
-                options.Address = new Uri(grpcValidationConnection);
+                options.Address = new Uri(grpcValidationConnection ?? string.Empty);
             });
         builder.Services.AddScoped<JwtValidationServiceGrpcClient>();
 
-        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
 
-        builder.Services.AddSwagger();
+        builder
+            .Services
+            .AddSwaggerGen(options =>
+            {
+                var xmlDocsFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlDocsFilePath = Path.Combine(AppContext.BaseDirectory, xmlDocsFileName);
+                
+                options.IncludeXmlComments(xmlDocsFilePath);
+            });
+
+        builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
+        
+        builder
+            .Services
+            .AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.ReportApiVersions = true;
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            })
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.ApiVersionParameterSource = new UrlSegmentApiVersionReader();
+                options.SubstituteApiVersionInUrl = true;
+            })
+            .EnableApiVersionBinding();
+        
         builder.Services.AddServiceAuthentiction();
-
         builder.Services.AddCors();
     } 
 }

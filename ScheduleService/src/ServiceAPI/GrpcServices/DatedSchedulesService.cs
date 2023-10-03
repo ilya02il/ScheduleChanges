@@ -2,13 +2,12 @@
 using Application.ScheduleWithChangesList.Queries.GetGroupNumbersListQuery;
 using Application.ScheduleWithChangesList.Queries.GetScheduleWithChangesListQuery;
 using AutoMapper;
-using Grpc.Core;
-using MediatR;
 using DatedSchedules.Messages;
 using DatedSchedules.Service;
-using System.Threading.Tasks;
+using Grpc.Core;
+using MediatR;
 
-namespace ServiceAPI.GrpcServices;
+namespace ScheduleService.ServiceAPI.GrpcServices;
 
 public class DatedSchedulesService : GrpcSchedule.GrpcScheduleBase
 {

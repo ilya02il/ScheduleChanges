@@ -1,8 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
-namespace ServiceAPI.Helpers;
+namespace ScheduleService.ServiceAPI.Helpers;
 
 public static class ClaimsHelper
 {
